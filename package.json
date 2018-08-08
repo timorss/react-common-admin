@@ -1,0 +1,57 @@
+{
+  "name": "react-common-admin",
+  "version": "1.0.0",
+  "description": "A react page container that works with [react-parse](https://www.npmjs.com/package/react-parse)  to fetch data from server and display as table/gallery or customs component.",
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "nwb build-react-component --title react-common-admin",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/doronnahum/react-common-admin.git"
+  },
+  "keywords": [
+    "react",
+    "react-native",
+    "form",
+    "fields",
+    "inputs",
+    "mobile",
+    "dropdown",
+    "date",
+    "validate"
+  ],
+  "author": "doron nahum",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/doronnahum/react-common-admin/issues"
+  },
+  "homepage": "https://github.com/doronnahum/react-common-admin#readme",
+  "dependencies": {
+    "babel-preset-latest": "^6.24.1",
+    "lodash": "^4.17.10",
+    "prop-types": "^15.6.0",
+    "react": "^16.3.0"
+  },
+  "devDependencies": {
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-react": "^6.24.1",
+    "babel-preset-stage-0": "^6.24.1",
+    "babel-runtime": "^6.26.0",
+    "copy-webpack-plugin": "^4.0.1",
+    "cross-env": "^5.1.3",
+    "css-loader": "^0.28.5",
+    "enzyme": "^3.3.0",
+    "enzyme-adapter-react-16": "^1.1.1",
+    "eslint": "^4.5.0",
+    "eslint-config-react-tools": "^1.0.10",
+    "eslint-plugin-import": "^2.7.0",
+    "eslint-plugin-jsx-a11y": "^6.0.2",
+    "eslint-plugin-react": "^7.3.0",
+    "gitdocs": "^1.5.17",
+    "jsdom": "^11.6.0",
+    "nwb": "^0.21.2"
+  }
+}
