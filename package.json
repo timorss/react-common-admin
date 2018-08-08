@@ -31,8 +31,11 @@
   "dependencies": {
     "babel-preset-latest": "^6.24.1",
     "lodash": "^4.17.10",
+    "moment": "^2.22.2",
     "prop-types": "^15.6.0",
-    "react": "^16.3.0"
+    "react": "^16.3.0",
+    "react-cross-form": "^1.2.9",
+    "react-cross-inputs": "0.0.12"
   },
   "devDependencies": {
     "babel-plugin-transform-runtime": "^6.23.0",

@@ -4,6 +4,7 @@ import {notification} from '../../configuration';
 import {Popconfirm} from 'antd'
 import {Form} from '../../index';
 import isEmpty from 'lodash/isEmpty';
+
 class DocForm extends React.Component {
   constructor(props) {
     super(props)

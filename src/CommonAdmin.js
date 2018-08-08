@@ -1,4 +1,5 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import {
   ContainerHeader,
@@ -7,7 +8,6 @@ import {
   DocForm as DefaultDocForm,
   Table as DefaultTable
 } from './components/index';
-import { connect } from 'react-redux';
 import { selectors, collectionActions, FetchCollection } from 'react-parse';
 import Document from './dataProviders/Document';
 import Collection from './dataProviders/Collection';

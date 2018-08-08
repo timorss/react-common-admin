@@ -1,8 +1,7 @@
+import * as fields from 'react-cross-inputs';
+import Form from 'react-cross-form';
 import CommonAdmin from './CommonAdmin';
 import * as formatters from './utils/formatters';
-import * as fields from '../react-common-admin';
-
-import Form from '../react-cross-form';
 import {initCommonAdmin} from './configuration';
 
 import {
