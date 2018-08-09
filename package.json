@@ -35,7 +35,7 @@
     "prop-types": "^15.6.0",
     "react": "^16.3.0",
     "react-cross-form": "^1.2.10",
-    "react-cross-inputs": "0.0.13"
+    "react-cross-inputs": "0.0.14"
   },
   "devDependencies": {
     "babel-plugin-transform-runtime": "^6.23.0",
