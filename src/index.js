@@ -8,7 +8,6 @@ import {initCommonAdmin} from './configuration';
 import {
   ContainerHeader,
   Loader,
-  Modal,
   SideModal,
   DocForm,
   Table,
@@ -24,7 +23,6 @@ export {
   Form,
   ContainerHeader,
   Loader,
-  Modal,
   SideModal,
   DocForm,
   Table,

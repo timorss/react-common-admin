@@ -1,3 +1,4 @@
+import React from 'react';
 const ContainerHeader = ({title}) => {
     return (
       <div className={'containerHeader'}>

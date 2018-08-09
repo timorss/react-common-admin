@@ -6,9 +6,15 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
 var _antd = require('antd');
 
 var _configuration = require('../../configuration');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -80,7 +86,7 @@ var SiderDemo = function (_React$Component) {
 
       var openClassName = fullScreen ? 'rca-sideModalOpenFull' : 'rca-sideModalOpen';
       var className = isOpen ? openClassName : 'rca-sideModalClosed';
-      return React.createElement(
+      return _react2.default.createElement(
         Sider,
         {
           trigger: null,
@@ -89,16 +95,16 @@ var SiderDemo = function (_React$Component) {
           width: 0,
           className: className
         },
-        React.createElement(
+        _react2.default.createElement(
           'div',
           { className: 'rca-sideModalTopIcons' },
-          React.createElement(_antd.Icon, {
+          _react2.default.createElement(_antd.Icon, {
             type: fullScreen ? _configuration.langDir === 'ltr' ? "right" : 'left' : _configuration.langDir === 'ltr' ? "left" : 'right',
             onClick: function onClick() {
               return _this2.setState({ fullScreen: !fullScreen });
             }
           }),
-          React.createElement(_antd.Icon, {
+          _react2.default.createElement(_antd.Icon, {
             type: "close",
             onClick: onClose
           })
@@ -109,6 +115,6 @@ var SiderDemo = function (_React$Component) {
   }]);
 
   return SiderDemo;
-}(React.Component);
+}(_react2.default.Component);
 
 exports.default = SiderDemo;

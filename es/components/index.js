@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.StaticDoc = exports.Gallery = exports.Table = exports.DocForm = exports.SideModal = exports.Modal = exports.Loader = exports.ContainerHeader = exports.Layout = undefined;
+exports.StaticDoc = exports.Gallery = exports.Table = exports.DocForm = exports.SideModal = exports.Loader = exports.ContainerHeader = exports.Layout = undefined;
 
 var _layout = require('antd/lib/layout');
 
@@ -21,10 +21,6 @@ var _ContainerHeader2 = _interopRequireDefault(_ContainerHeader);
 var _Loader = require('./Loader');
 
 var _Loader2 = _interopRequireDefault(_Loader);
-
-var _Modal = require('./Modal');
-
-var _Modal2 = _interopRequireDefault(_Modal);
 
 var _SideModal = require('./SideModal');
 
@@ -50,7 +46,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.ContainerHeader = _ContainerHeader2.default;
 exports.Loader = _Loader2.default;
-exports.Modal = _Modal2.default;
 exports.SideModal = _SideModal2.default;
 exports.DocForm = _DocForm2.default;
 exports.Table = _Table2.default;

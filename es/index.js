@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.StaticDoc = exports.Gallery = exports.Table = exports.DocForm = exports.SideModal = exports.Modal = exports.Loader = exports.ContainerHeader = exports.Form = exports.fields = exports.formatters = exports.CommonAdmin = exports.initCommonAdmin = undefined;
+exports.StaticDoc = exports.Gallery = exports.Table = exports.DocForm = exports.SideModal = exports.Loader = exports.ContainerHeader = exports.Form = exports.fields = exports.formatters = exports.CommonAdmin = exports.initCommonAdmin = undefined;
 
 var _CommonAdmin = require('./CommonAdmin');
 
@@ -36,7 +36,6 @@ exports.fields = fields;
 exports.Form = _reactCrossForm2.default;
 exports.ContainerHeader = _components.ContainerHeader;
 exports.Loader = _components.Loader;
-exports.Modal = _components.Modal;
 exports.SideModal = _components.SideModal;
 exports.DocForm = _components.DocForm;
 exports.Table = _components.Table;

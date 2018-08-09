@@ -1,3 +1,4 @@
+import React from 'react';
 import { Layout, Menu, Icon } from 'antd';
 import {langDir} from '../../configuration';
 const { Header, Sider, Content } = Layout;
