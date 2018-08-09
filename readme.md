@@ -11,6 +11,17 @@ You need to install:
 npm i react-common-admin --save
 ```
 
+### Inside root component
+(In nextjs use _app.js)
+```jsx
+import {initCommonAdmin} from 'react-common-admin';
+import { notification } from 'antd';
+const langDir = 'ltr'
+
+initCommonAdmin({notification, langDir})
+
+```
+
 ## Basic Usage
 ```jsx
 import  React  from  'react';
