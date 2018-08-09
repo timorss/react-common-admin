@@ -15,6 +15,7 @@ npm i react-common-admin --save
 ```jsx
 import  React  from  'react';
 import {CommonAdmin, fields} from  'react-common-admin'
+import 'react-common-admin/src/style.css';
 import {DocFields, TableField} from  './config';
 
 const DocFields = [ // See react-cross-form
