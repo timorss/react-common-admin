@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
-import { Button, Input, Popconfirm, Table as TableWrapper } from 'antd';
-import { buildQuery } from '../../utils/helpers';
-const Search = Input.Search;
+import { Button, Popconfirm, Table as TableWrapper } from 'antd';
+import ListWrapper from '../ListWrapper'
 const ButtonGroup = Button.Group;
 const rowKey = 'objectId';
 
@@ -12,41 +11,20 @@ export default class SortView extends Component {
       selectedRows: [],
       searchText: ''
     };
-    this.onChange = this.onChange.bind(this);
     this.convertPageFieldsToAntTableColumn = this.convertPageFieldsToAntTableColumn.bind(
       this
     );
-    this.onPagination = this.onPagination.bind(this);
     this.onSelectRow = this.onSelectRow.bind(this);
     this.toggleRow = this.toggleRow.bind(this);
     this.renderRowButtons = this.renderRowButtons.bind(this);
-    this.onPageChange = this.onPageChange.bind(this);
     this.isRowSelected = this.isRowSelected.bind(this);
-    this.onSearchChange = this.onSearchChange.bind(this);
-    this.onClearSearch = this.onClearSearch.bind(this);
   }
 
-  onPagination(page, pageSize) {
-    this.props.onPagination(page, pageSize)
-  }
   isRowSelected(row) {
-    return this.state.selectedRows.indexOf(row[rowKey]) !== -1;
+    return this.state.selectedRows.includes(row[rowKey]);
   }
-  onChange(pagination, filters, sorter) {
-    const { dataList } = this.props;
-    if (sorter && sorter.columnKey && sorter.order) {
-      if (sorter.order === 'ascend') {
-        dataList.getSortAsc(sorter.columnKey);
-      } else {
-        dataList.getSortDesc(sorter.columnKey);
-      }
-      this.setState({ dataList: dataList.getAll() });
-    }
-  }
+
   renderRowButtons(row = {}) {
-    const _this = this;
-    // console.log('renderRowButton',{ object, props: this.props})
-    const isSelected = this.isRowSelected(row);
     const hasDelete = this.props.fetchProps && this.props.fetchProps.deleteDoc // react-parse cloudcode missing deleteDoc
     return (
       <ButtonGroup style={{display: 'flex'}}>
@@ -67,20 +45,9 @@ export default class SortView extends Component {
       </ButtonGroup>
     );
   }
-  onSearchChange(key, value) {
-    const { fields } = this.props;
-    this.setState({[key]: value}, () => {
-      const newQuery = buildQuery({ [key]: value, fields })
-      this.props.onQueryChanged(newQuery)
-    })
-  }
-  onClearSearch() {
-    const { fields } = this.props;
-    this.onSearchChange('searchText', '')
-  }
+
   convertPageFieldsToAntTableColumn() {
-    const { fields, fetchProps, extraData } = this.props;
-    // const {data} = fetchProps
+    const { fields, extraData } = this.props;
     const columns = [];
     fields.forEach(field => {
       columns.push({
@@ -100,6 +67,7 @@ export default class SortView extends Component {
     });
     return columns;
   }
+
   onSelectRow(selectedRows, toggleRow) {
     this.setState({ selectedRows });
   }
@@ -113,100 +81,32 @@ export default class SortView extends Component {
       this.setState({selectedRows: this.state.selectedRows})
     }
   }
-  onPageChange(page, pageSize) {
-    const { onSkipChanged, limit } = this.props;
-    onSkipChanged(page * limit);
-  }
-  showLoader(delay) {
-    let _this = this;
-    this.setState({ loading: true }, () => {
-      this.loaderTimeOut = setTimeout(() => {
-        _this.setState({ loading: false });
-      }, delay);
-    });
-  }
-  componentWillUnmount = () => {
-    this.loaderTimeOut && clearTimeout(this.loaderTimeOut);
-  };
 
   render() {
     const props = this.props;
-    const { fetchProps, isLoading, onCreateNewDoc } = props;
-    const { info, data, refresh } = fetchProps;
+    const { fetchProps } = props;
+    const { data } = fetchProps;
+    const isLoading = props.isLoading || fetchProps.isLoading
     const { selectedRows } = this.state;
     const rowSelection = {
       selectedRowKeys: selectedRows,
       onChange: this.onSelectRow
     };
-    const numberOfRows = info ? info.count : 0;
+    // const numberOfRows = info ? info.count : 0;
     const isOneRowSelected = selectedRows && selectedRows.length === 1
-    const hasDelete = this.props.fetchProps && this.props.fetchProps.deleteDoc // react-parse cloudcode missing deleteDoc
     return (
-      <div>
-        <div className="genericTable">
-          <div className={'genericTableHeaderBtn'}>
-            <div className={'gLSearchWrapper'}>
-              <Search
-                className={'searchInput'}
-                placeholder="input search text"
-                onChange={e =>
-                  this.onSearchChange('searchText', e.target.value)
-                }
-                value={this.state.searchText}
-              />
-              <Button type="secondary" onClick={this.onClearSearch}>
-                clear
-              </Button>
-            </div>
-            <Button type="secondary"
-              className='mL15'
-              loading={isLoading || this.state.loading}
-              onClick={() => {
-                this.showLoader(1000);
-                refresh();
-              }}
-            >
-              Refresh
-            </Button>
-            {(isOneRowSelected && hasDelete) &&
-            <Popconfirm
-
-              okType="danger"
-              title={'Are you sure delete this ?'}
-              onConfirm={() => this.props.fetchProps.deleteDoc(selectedRows[0])}
-              okText="Yes"
-              cancelText="No"
-            >
-              <Button type="danger" className='mL15'>Delete</Button>
-            </Popconfirm>
-            }
-            {isOneRowSelected &&
-            <Button type="warning" onClick={() => this.props.onEditDoc(selectedRows[0])} className='mL15'>
-              Edit
-            </Button>
-            }
-            <Button type="primary" ghost onClick={onCreateNewDoc} className='mL15'>
-              Add
-            </Button>
-          </div>
-          <TableWrapper
-            rowKey={rowKey}
-            columns={this.convertPageFieldsToAntTableColumn()}
-            onChange={this.onChange}
-            dataSource={data || []}
-            className="isoSortingTable"
-            loading={isLoading}
-            rowSelection={rowSelection}
-            pagination={{
-              showSizeChanger: true,
-              onShowSizeChange: this.onPagination,
-              onChange: this.onPagination,
-              defaultCurrent: this.props.skip / this.props.limit || 1,
-              total: numberOfRows || 0
-            }}
-          />
-        </div>
-      </div>
+      <ListWrapper {...this.props} isOneRowSelected={isOneRowSelected}>
+        <TableWrapper
+          rowKey={rowKey}
+          columns={this.convertPageFieldsToAntTableColumn()}
+          onChange={this.onChange}
+          dataSource={data || []}
+          className="rca-table"
+          loading={false}
+          rowSelection={rowSelection}
+          pagination={false}
+        />
+      </ListWrapper>
     );
   }
 }

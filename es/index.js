@@ -3,15 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.Gallery = exports.Table = exports.DocForm = exports.SideModal = exports.Modal = exports.Loader = exports.ContainerHeader = exports.Form = exports.fields = exports.formatters = exports.CommonAdmin = exports.initCommonAdmin = undefined;
-
-var _reactCrossInputs = require('react-cross-inputs');
-
-var fields = _interopRequireWildcard(_reactCrossInputs);
-
-var _reactCrossForm = require('react-cross-form');
-
-var _reactCrossForm2 = _interopRequireDefault(_reactCrossForm);
+exports.StaticDoc = exports.Gallery = exports.Table = exports.DocForm = exports.SideModal = exports.Modal = exports.Loader = exports.ContainerHeader = exports.Form = exports.fields = exports.formatters = exports.CommonAdmin = exports.initCommonAdmin = undefined;
 
 var _CommonAdmin = require('./CommonAdmin');
 
@@ -21,13 +13,21 @@ var _formatters = require('./utils/formatters');
 
 var formatters = _interopRequireWildcard(_formatters);
 
+var _reactCrossInputs = require('react-cross-inputs');
+
+var fields = _interopRequireWildcard(_reactCrossInputs);
+
+var _reactCrossForm = require('react-cross-form');
+
+var _reactCrossForm2 = _interopRequireDefault(_reactCrossForm);
+
 var _configuration = require('./configuration');
 
 var _components = require('./components');
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.initCommonAdmin = _configuration.initCommonAdmin;
 exports.CommonAdmin = _CommonAdmin2.default;
@@ -41,3 +41,4 @@ exports.SideModal = _components.SideModal;
 exports.DocForm = _components.DocForm;
 exports.Table = _components.Table;
 exports.Gallery = _components.Gallery;
+exports.StaticDoc = _components.StaticDoc;

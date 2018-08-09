@@ -89,7 +89,7 @@ class Collection extends React.Component {
 
 
   render() {
-    const { targetName, schemaName, query, leaveClean, viewComponent, onClose, extraData, onCreateNewDoc, onEditDoc, fields, keys, include, functionName, dataHandler, ...resProps } = this.props
+    const { targetName, schemaName, query, leaveClean, viewComponent, onClose, extraData, onCreateNewDoc, onEditDoc, fields, keys, include, functionName, dataHandler, tableProps, ...resProps } = this.props
     const props = {
       ...resProps,
       key: targetName,
@@ -116,6 +116,7 @@ class Collection extends React.Component {
       onPagination: this.onPagination,
       extraData: extraData,
       component: viewComponent,
+      ...tableProps
     }
     if(functionName) {
       return (

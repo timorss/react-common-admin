@@ -116,7 +116,8 @@ var DocWrapper = function (_React$Component) {
           extraData = _props.extraData,
           fieldsOptions = _props.fieldsOptions,
           messages = _props.messages,
-          resProps = _objectWithoutProperties(_props, ['isOpen', 'customTitle', 'onClose', 'saveOnBlur', 'targetName', 'schemaName', 'fields', 'objectId', 'viewComponent', 'extraData', 'fieldsOptions', 'messages']);
+          dataFromCollection = _props.dataFromCollection,
+          resProps = _objectWithoutProperties(_props, ['isOpen', 'customTitle', 'onClose', 'saveOnBlur', 'targetName', 'schemaName', 'fields', 'objectId', 'viewComponent', 'extraData', 'fieldsOptions', 'messages', 'dataFromCollection']);
 
       var WrapperElement = this.props.wrapper;
       var title = customTitle ? customTitle({ state: this.state, props: this.props }) : objectId ? 'Edit - ' + objectId : 'Create New Doc';
@@ -151,7 +152,8 @@ var DocWrapper = function (_React$Component) {
           fieldsOptions: fieldsOptions,
           component: viewComponent,
           title: title,
-          messages: messages
+          messages: messages,
+          dataFromCollection: dataFromCollection
         }, resProps))
       );
     }
@@ -175,12 +177,14 @@ DocWrapper.propTypes = process.env.NODE_ENV !== "production" ? {
   // configuration
   fields: _propTypes2.default.array.isRequired, // data that will pass to react-parse document view
   saveOnBlur: _propTypes2.default.bool, // When true we call onPut when input is blur, but only if newValue !== initialValue (initialValue is value from onFocus)
-  parseDataBeforePost: _propTypes2.default.func // Yoc can pass a function that get the document data and return the data you want to post the server
+  parseDataBeforePost: _propTypes2.default.func, // Yoc can pass a function that get the document data and return the data you want to post the server
+  dataFromCollection: _propTypes2.default.object
 } : {};
 
 DocWrapper.defaultProps = {
   saveOnBlur: true,
   onPostFinished: function onPostFinished() {},
   onPutFinished: function onPutFinished() {},
-  onDeleteFinished: function onDeleteFinished() {}
+  onDeleteFinished: function onDeleteFinished() {},
+  dataFromCollection: {}
 };

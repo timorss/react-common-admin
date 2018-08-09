@@ -1,0 +1,160 @@
+/* --- React Common Admin */
+
+/* main */
+.rca-main {
+  position: relative;
+}
+.rca-main-pageHeader {
+  background: white;
+  padding-left: 15px;
+}
+.rca-listWrapper-loader {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center
+}
+.rca-main-pageContent{
+  margin: 24px 16px;
+  padding: 24px;
+  background: white;
+  min-height: 280px
+}
+/* list wrapper */
+.rca-listWrapper-Screen{
+  width: 100%
+}
+
+.rca-listWrapper-header {
+  margin-bottom: 25px;
+  display: flex;
+}
+
+.rca-listWrapper-search {
+  display: flex
+}
+.rca-listWrapper-searchInput{
+  margin-right: 15px;
+}
+.rca-listWrapper-actions {
+  display: flex;
+  margin-left: auto;
+}
+.rca-listWrapper-body{
+  margin-bottom: 30px;
+}
+
+.rca-mL15 {
+  margin-left: 15;
+}
+
+
+.rca-gallery {
+  display: flex;
+  max-width: 100%;
+  height: auto;
+  flex-flow: column wrap;
+  flex-direction: row;
+  justify-content: space-evenly;
+}
+.rca-g-img-container {
+  background-color: #ffffff;
+  position: relative;
+  margin-bottom: 15px;
+  box-shadow: 0 0 1px rgba(0, 0, 0, 0.42);
+}
+.rca-g-moreOption {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  transform: rotate(90deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 1px !important;
+}
+.rca-g-footer {
+    height: 100px;
+    padding: 5px;
+    display: flex;
+    flex-direction: column;
+}
+
+.rca-g-footer-bottom {
+  display: flex;
+  margin-top: auto;
+  justify-content: space-between;
+}
+.rca-g-date {
+  height: 15px;
+}
+.rca-g-select {
+  height: 15px;
+}
+.rca-g-img-in-modal{
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+}
+.rca-g-modal {
+  display:  flex;
+}
+.rca-g-modal .ant-modal-body{
+  display:  flex;
+}
+
+.rca-doc-loader {
+  background: #0000000d;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding-top: 45%;
+} 
+
+.rca-sideModalTopIcons {
+  display: flex;
+  justify-content: space-between;
+  padding-right: 15px;
+  padding-left: 15px;
+  padding-top: 15px;
+}
+.rca-sideModalClosed {
+  background-color: white;
+  flex: 0 0 0px !important;
+  max-width: 0px !important;
+  min-width: 0px !important;
+  width: 0px !important;
+} 
+.rca-sideModalOpen {
+  background-color: white;
+  flex: 0 0 40% !important;
+  max-width: none !important;
+  min-width: 475px !important;
+  width: 40% !important;
+}
+.rca-sideModalOpenFull {
+  background-color: white;
+  flex: 0 0 100% !important;
+  max-width: 100% !important;
+  min-width: 100% !important;
+  width: 100% !important;
+}
+.rca-docForm {
+  top: 30px;
+  min-Height: calc(100vh - 125px);
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+}
+.rca-docForm form{
+  flex: 1
+}
+.rca-docForm .bottomBtns {
+  margin: 5px;
+}
+
+/* --- React Common Admin End*/

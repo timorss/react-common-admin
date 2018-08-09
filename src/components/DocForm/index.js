@@ -4,7 +4,6 @@ import {notification} from '../../configuration';
 import {Popconfirm} from 'antd'
 import {Form} from '../../index';
 import isEmpty from 'lodash/isEmpty';
-
 class DocForm extends React.Component {
   constructor(props) {
     super(props)
@@ -107,7 +106,7 @@ class DocForm extends React.Component {
     } = fetchProps
     const isFirstLoading = objectId && isEmpty(data)
     return (
-      <div className="docForm">
+      <div className="rca-docForm">
         <form onSubmit={this.onSubmit}>
           <Form
             fields={fields}
@@ -130,7 +129,7 @@ class DocForm extends React.Component {
               type="button"
               className="btn btn-primary ant-btn ant-btn-primary bottomBtns"
               disabled={!this.state.isFormValid}
-              onClick={() => { this.onPost() }}> Save </button>}
+              onClick={this.onPost}> Save </button>}
           {objectId && <button type="button" className="btn btn-primary ant-btn ant-btn-secondary bottomBtns" onClick={refresh} > Refresh </button>}
           {/* {objectId && <button type="button" className="btn btn-primary ant-btn ant-btn-danger bottomBtns" onClick={this.onDelete} > Delete </button>} */}
           {objectId && <Popconfirm title={'Are you sure delete this ?'} okType='danger' onConfirm={this.props.fetchProps.deleteDoc} okText="Yes" cancelText="No">

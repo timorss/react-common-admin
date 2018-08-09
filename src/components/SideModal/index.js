@@ -46,8 +46,8 @@ class SiderDemo extends React.Component {
     const {isOpen, onClose} = this.props
     // const openWidth = fullScreen ? FULL_WIDTH : SMALL_WIDTH
     // const width = isOpen ? openWidth : 0
-    const openClassName = fullScreen ? 'sideModalOpenFull' : 'sideModalOpen'
-    const className = isOpen ? openClassName : 'sideModalClosed'
+    const openClassName = fullScreen ? 'rca-sideModalOpenFull' : 'rca-sideModalOpen'
+    const className = isOpen ? openClassName : 'rca-sideModalClosed'
     return (
         <Sider
           trigger={null}
@@ -56,7 +56,7 @@ class SiderDemo extends React.Component {
           width={0}
           className={className}
         >
-          <div className={'sideModalTopIcons'}>
+          <div className={'rca-sideModalTopIcons'}>
             <Icon
               type={(fullScreen) ? (langDir === 'ltr' ? "right" : 'left') : (langDir === 'ltr' ? "left" : 'right')}
               onClick={()=> this.setState({fullScreen: !fullScreen})}

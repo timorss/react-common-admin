@@ -1,5 +1,4 @@
 import React from 'react';
-import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import {
   ContainerHeader,
@@ -8,6 +7,7 @@ import {
   DocForm as DefaultDocForm,
   Table as DefaultTable
 } from './components/index';
+import { connect } from 'react-redux';
 import { selectors, collectionActions, FetchCollection } from 'react-parse';
 import Document from './dataProviders/Document';
 import Collection from './dataProviders/Collection';
@@ -18,7 +18,8 @@ class Page extends React.Component {
     this.state = {
       showDocumentModal: false,
       currentDocId: null,
-      docKey: 0
+      docKey: 0,
+      dataFromCollection: null
     };
     this.onCreateNewDoc = this.onCreateNewDoc.bind(this);
     this.onEditDoc = this.onEditDoc.bind(this);
@@ -65,13 +66,15 @@ class Page extends React.Component {
   }
 
   closeDocumentModal() {
-    this.setState({ showDocumentModal: false, currentDocId: null }, () => this.props.onShowDocumentModal(false));
+    this.setState({ showDocumentModal: false, currentDocId: null, dataFromCollection: null }, () => this.props.onShowDocumentModal(false));
   }
 
-  onCreateNewDoc() {
+  onCreateNewDoc(dataFromCollection) {
+    console.log({dataFromCollection})
     this.setState({
       showDocumentModal: true,
       currentDocId: null,
+      dataFromCollection,
       docKey: this.increaseDocKey()
     }, () => this.props.onShowDocumentModal(true));
   }
@@ -80,10 +83,11 @@ class Page extends React.Component {
     return this.state.docKey + 1;
   }
 
-  onEditDoc(docId) {
+  onEditDoc(docId, dataFromCollection) {
     this.setState({
       showDocumentModal: true,
       currentDocId: docId,
+      dataFromCollection,
       docKey: this.increaseDocKey()
     }, () => this.props.onShowDocumentModal(true));
   }
@@ -125,12 +129,13 @@ class Page extends React.Component {
   }
 
   renderDocument() {
-    const { showDocumentModal, currentDocId, docKey } = this.state;
+    const { showDocumentModal, currentDocId, docKey, dataFromCollection } = this.state;
     const {
       targetName,
       schemaName,
       documentProps,
-      extraData
+      extraData,
+      showCollection
     } = this.props;
     const {fields, wrapper, viewComponent, parseDataBeforePost, saveOnBlur, skip, limit, query, onLimitChanged, onSkipChanged, onOrderChanged, onQueryChanged, messages, ...resDocumentProps} = documentProps;
     const documentTargetName = `${targetName}-${currentDocId || 'new_doc'}`;
@@ -154,7 +159,7 @@ class Page extends React.Component {
         // wrapper component
         wrapper={wrapper || DefaultSideModal}
         // pass to wrapper component - toggle to show/hide the document
-        isOpen={showDocumentModal}
+        isOpen={showDocumentModal || !showCollection}
         onClose={this.closeDocumentModal}
         // this is the view that get all document props {onClose, objectId, saveOnBlur, fetchProps, fields, extraData, ...documentProps}, fetchProps is react-parse response
         viewComponent={viewComponent || DefaultDocForm}
@@ -167,6 +172,7 @@ class Page extends React.Component {
         onOrderChanged={onOrderChanged}
         onQueryChanged={onQueryChanged}
         messages={messages}
+        dataFromCollection={dataFromCollection}
         {...resDocumentProps}
       />
     );
@@ -182,7 +188,7 @@ class Page extends React.Component {
       extraData,
       functionName
     } = this.props;
-    const {fields, viewComponent, dataHandler, ...resCollectionProps} = collectionProps;
+    const {fields, viewComponent, dataHandler, tableProps, ...resCollectionProps} = collectionProps;
     return (
       <Collection
         key={schemaName}
@@ -205,24 +211,26 @@ class Page extends React.Component {
         showLoader={showLoader}
         // this is the view that get all collection props {title, onQueryChanged,skip,limit,fetchProps,showLoader,onEditDoc,onCreateNewDoc,extraData   ...collectionProps}, fetchProps is react-parse response
         viewComponent={viewComponent || DefaultTable}
+        {...tableProps}
         {...resCollectionProps}
       />
     );
   }
 
   render() {
-    const { title, showPageHeader } = this.props;
+    const { title, showPageHeader, showCollection } = this.props;
     return (
-      <Layout className={'rca'}>
+      <Layout className={'rca-main'}>
         <Layout>
-          <Layout.Header className={'rca-pageHeader'}>
+          <Layout.Header className={'rca-main-pageHeader'}>
             {showPageHeader && <ContainerHeader title={title} />}
           </Layout.Header>
-          <Layout.Content className={'rca-pageContent'} >
-            {this.renderCollection()}
+          <Layout.Content className={'rca-main-pageContent'} >
+            {showCollection && this.renderCollection()}
+            {(!showCollection) && this.renderDocument()}
           </Layout.Content>
         </Layout>
-        {this.renderDocument()}
+        {showCollection && this.renderDocument()}
         {this.handleFetchExtraData(this.props.fetchExtraData)}
       </Layout>
     );
@@ -254,7 +262,8 @@ export default connect(
 
 Page.defaultProps = {
   onShowDocumentModal: () => {},
-  showPageHeader: true
+  showPageHeader: true,
+  showCollection: true
 };
 Page.propTypes = {
   showPageHeader: PropTypes.bool,

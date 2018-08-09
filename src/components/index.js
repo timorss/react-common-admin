@@ -6,6 +6,7 @@ import SideModal from './SideModal'
 import DocForm from './DocForm'
 import Table from './Table'
 import Gallery from './Gallery'
+import StaticDoc from './StaticDoc'
 export { default as Layout } from 'antd/lib/layout';
 
 export {
@@ -15,5 +16,6 @@ export {
   SideModal,
   DocForm,
   Table,
-  Gallery
+  Gallery,
+  StaticDoc
 }

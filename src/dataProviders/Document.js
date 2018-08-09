@@ -56,7 +56,7 @@ export default class DocWrapper extends React.Component {
   }
 
   render() {
-    const { isOpen, customTitle, onClose, saveOnBlur, targetName, schemaName, fields, objectId, viewComponent, extraData, fieldsOptions, messages, ...resProps } = this.props
+    const { isOpen, customTitle, onClose, saveOnBlur, targetName, schemaName, fields, objectId, viewComponent, extraData, fieldsOptions, messages, dataFromCollection,  ...resProps } = this.props
     const WrapperElement = this.props.wrapper
     const title = customTitle ? customTitle({state: this.state, props: this.props}) : (objectId ? `Edit - ${objectId}` : 'Create New Doc')
     return (
@@ -90,6 +90,7 @@ export default class DocWrapper extends React.Component {
           component={viewComponent}
           title={title}
           messages={messages}
+          dataFromCollection={dataFromCollection}
           {...resProps}
         />
       </WrapperElement>
@@ -109,7 +110,8 @@ DocWrapper.propTypes = {
   // configuration
   fields: PropTypes.array.isRequired, // data that will pass to react-parse document view
   saveOnBlur: PropTypes.bool, // When true we call onPut when input is blur, but only if newValue !== initialValue (initialValue is value from onFocus)
-  parseDataBeforePost: PropTypes.func // Yoc can pass a function that get the document data and return the data you want to post the server
+  parseDataBeforePost: PropTypes.func, // Yoc can pass a function that get the document data and return the data you want to post the server
+  dataFromCollection: PropTypes.object
 };
 
 DocWrapper.defaultProps = {
@@ -117,4 +119,5 @@ DocWrapper.defaultProps = {
   onPostFinished: () => {},
   onPutFinished: () => {},
   onDeleteFinished: () => {},
+  dataFromCollection: {}
 };
