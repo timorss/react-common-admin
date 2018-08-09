@@ -3,6 +3,10 @@
 
 A react page container that works with [react-parse](https://www.npmjs.com/package/react-parse)  to fetch data from server and display as table/gallery or customs component.
 
+
+[react-parse](https://www.npmjs.com/package/react-parse) + [react-cross-inputs](https://github.com/doronnahum/react-cross-inputs) + [react-cross-form](https://github.com/doronnahum/react-cross-form)
+as a one unit with table and document view
+
 ## Installation
 You need to install:
 [Ant Design](https://ant.design/) 
