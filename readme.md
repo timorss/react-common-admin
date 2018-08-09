@@ -26,6 +26,9 @@ initCommonAdmin({notification, langDir})
 
 ```
 
+### You need to import the css to your root file or in the relevant screens
+import 'react-common-admin/src/style.css';
+
 ## Basic Usage
 ```jsx
 import  React  from  'react';
