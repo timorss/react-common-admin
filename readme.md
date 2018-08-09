@@ -5,7 +5,8 @@ A react page container that works with [react-parse](https://www.npmjs.com/packa
 
 ## Installation
 You need to install:
-[Ant Design](https://ant.design/)
+[Ant Design](https://ant.design/) 
+[styled-components](https://github.com/styled-components/styled-components)
 ```bash
 npm i react-common-admin --save
 ```
@@ -106,6 +107,7 @@ onSkipChanged|funciton|
 onOrderChanged|funciton|
 onPagination|funciton|
 onQueryChanged|funciton|
+tableProps|object| see collention tableProps
 ### collention viewComponent props
 ------
 ```jsx
@@ -115,8 +117,8 @@ onQueryChanged|funciton|
 	dataHandler - see react-parse dataHandler (clodeCode)
 	extraData - all fetchExtraData results
 	title - string
-	onCreateNewDoc- function - call this and document modal will display
-	onEditDoc- function - call this with objectId and document modal will display to edit
+	onCreateNewDoc- function - call this and document modal will display, you can pass as first parameter any data you want and document will get this on props.dataFromCollection
+	onEditDoc- function - call this with objectId and document modal will display to edit, you can pass as seconde parameter any data you want and document will get this on props.dataFromCollectio
 	skip - number
 	limit - number
 	// function to call when you want to set a new value
@@ -129,6 +131,83 @@ onQueryChanged|funciton|
 }
 ```
 
+### collention tableProps
+-----
+| key | type | Description|
+|-----|--|--|
+|renderAddBtn|function|funciton that get all table props and need to return a button|
+renderAddBtn example 
+
+```jsx
+renderSelectTypeToAdd(res) {
+const  productTypes  =  objDig(res, 'extraData.ProductType') || []
+const  onSelect  = (menuItem) => {
+res.onCreateNewDoc(menuItem.item.props.value)
+}
+return (
+	<Dropdown 
+		overlay={
+			<Menu  onClick={onSelect}>
+			{productTypes.map(item  => {
+			return  <Menu.Item  key={item.objectId}  value={item}>{item.name}</Menu.Item>
+			})}</Menu>
+		}
+		>
+		<Button  style={{ marginLeft: 8 }}>
+			Add <Icon  type="down" />
+		</Button>
+	</Dropdown>
+)
+}
+...
+tableProps: {
+renderAddBtn: this.renderSelectTypeToAdd
+}
+```
+
+
+
 ### react-parse fetchProps
 see full details in [react-parse docs](https://github.com/doronnahum/react-parse#fetchprops)
 {data, error, status, info. isLoading, refresh, cleanData, put, post, deleteDoc, updateField}
+
+### Need only a documet witout list?
+See this example
+```jsx
+import React from 'react';
+import {CommonAdmin, StaticDoc} from 'react-common-admin'
+import {DocFields} from './config';
+
+export default class Example extends React.Component {
+  render() {
+    return (
+      <div>
+        <CommonAdmin
+          schemaName='Member'
+          targetName='ProfileSettings'
+          title='Profile Settings'
+          showCollection={false} //--------------->!important
+          documentProps={{
+            fields: DocFields,
+            objectId: 'eviegCusH8',
+            wrapper: StaticDoc, //--------------->!important
+            messages: {
+              onPostMessage: 'Create successfully',
+              onPostFailedMessage: 'Create failed',
+              onPutMessage: 'Update successfully',
+              onPutFailedMessage: 'Update failed):',
+              onDeleteMessage: 'Deleted successfully',
+              onDeleteFailedMessage: 'Deleted failed'
+            },
+            customTitle: ({objectId, data}) => { 'title' }
+          }}
+          fetchExtraData={[
+            {schemaName: 'City', targetName: 'CityDropDown'},
+          ]}
+        />
+      </div>
+    );
+  }
+}
+
+```
