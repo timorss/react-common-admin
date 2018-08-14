@@ -3,37 +3,19 @@
 
 A react page container that works with [react-parse](https://www.npmjs.com/package/react-parse)  to fetch data from server and display as table/gallery or customs component.
 
-
-[react-parse](https://www.npmjs.com/package/react-parse) + [react-cross-inputs](https://github.com/doronnahum/react-cross-inputs) + [react-cross-form](https://github.com/doronnahum/react-cross-form)
-as a one unit with table and document view
+![demo](https://github.com/doronnahum/react-common-admin/blob/master/Aug-14-2018%2009-21-58.gif)
 
 ## Installation
 You need to install:
-[Ant Design](https://ant.design/) 
-[styled-components](https://github.com/styled-components/styled-components)
+[Ant Design](https://ant.design/)
 ```bash
 npm i react-common-admin --save
 ```
-
-### Inside root component
-(In nextjs use _app.js)
-```jsx
-import {initCommonAdmin} from 'react-common-admin';
-import { notification } from 'antd';
-const langDir = 'ltr'
-
-initCommonAdmin({notification, langDir})
-
-```
-
-### You need to import the css to your root file or in the relevant screens
-import 'react-common-admin/src/style.css';
 
 ## Basic Usage
 ```jsx
 import  React  from  'react';
 import {CommonAdmin, fields} from  'react-common-admin'
-import 'react-common-admin/src/style.css';
 import {DocFields, TableField} from  './config';
 
 const DocFields = [ // See react-cross-form
@@ -79,7 +61,7 @@ render() {
 |targetName|string <br/><small>required<small></small></small>|react-parse targetName|
 |schemaName|string <br/><small>required<small></small></small>|react-parse schemaName|
 functionName|string| react-parse functionName <br/> <small><small>When you using clude code the delete from table is not enabled</small></small>
-onShowDocumentModal|function| Function that be call when DocumentModal state is changed
+onVisibleDocumentsChanged|function| Function that be call when VisibleDocuments state is changed
 fetchExtraData|array|array of objects, each object is react-parse collection configuration <br />[{schemaName: 'Member', targetName: 'MemberData'}]<br/> The data will be avilable for you in the components
 documentProps|object <br/><small>required<small></small></small>| See documentProps
 collectionProps|object <br/><small>required<small></small></small>| See collectionProps
@@ -92,9 +74,15 @@ wrapper|element|You can replace the default side modal wrapper , wrapper get thi
 viewComponent|element|See document viewComponent props
 title|string|title to display
 customTitle|function| function that get {state, props} and return string as title
-parseDataBeforePost|function| optional - function that call with the data before post, (data) => {return ({...data, {test: 1})}
+parseDataBeforePost|function| optional - function that call with the data before post, (data, tableProps) => {return ({...data, {test: 1})}
+parseDataBeforePut|function| optional - function that call with the data before put, (data, tableProps, objectId, docFetchProps) => {return ({...data, {test: 1})}
 saveOnBlur|boollean| default is true, run react-parse put when input is blur
 messages| object| You can display a custom message, this data will pass to your notification service, see  initCommonAdmin
+onPostFinished|function|react-parse onPostFinished
+onPutFinished|function|react-parse onPutFinished
+onDeleteFinished|function|react-parse onDeleteFinished
+showDeleteButton|boolean|
+showCloseButton|boolean
 ### document viewComponent props
 -----
 ```jsx
@@ -126,7 +114,7 @@ onSkipChanged|funciton|
 onOrderChanged|funciton|
 onPagination|funciton|
 onQueryChanged|funciton|
-tableProps|object| see collention tableProps
+tableProps|object| any props you want to pass to the viewComponent
 ### collention viewComponent props
 ------
 ```jsx
@@ -150,11 +138,12 @@ tableProps|object| see collention tableProps
 }
 ```
 
-### collention tableProps
+### collention - tableProps options
 -----
 | key | type | Description|
 |-----|--|--|
 |renderAddBtn|function|funciton that get all table props and need to return a button|
+customOnEdit|function| funciton that be call when user click on edit button, with the row and all table props (rowObjectId, tableProps) => {...}
 renderAddBtn example 
 
 ```jsx
@@ -179,9 +168,15 @@ return (
 )
 }
 ...
+...
+<CommonAdmin
+...
+collectionPops: {
+...
 tableProps: {
-renderAddBtn: this.renderSelectTypeToAdd
+renderAddBtn: this.renderSelectTypeToAdd,
 }
+...
 ```
 
 
@@ -229,4 +224,19 @@ export default class Example extends React.Component {
   }
 }
 
+```
+
+## DraggableTable example
+By default collection render a table, if you want you can pass as viewComponent a DraggableTable, it is like the regular table with the ability to drag row and change value in the DB base user drag and drop
+```jsx
+import {CommonAdmin, DraggableTable} from  'react-common-admin';
+<CommonAdmin
+...
+	collectionProps={{
+	...
+		viewComponent:  DraggableTable,
+		tableProps: {
+			orderKey:  'orderKey' // in this case each document in the DB contain orderKey key with value that help us render the view by a specific order
+		}
+...
 ```
