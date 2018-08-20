@@ -6,17 +6,87 @@ A react page container that works with [react-parse](https://www.npmjs.com/packa
 ![demo](https://github.com/doronnahum/react-common-admin/blob/master/Aug-14-2018%2009-21-58.gif)
 
 ## Installation
-You need to install:
-[Ant Design](https://ant.design/)
+1- You need to install:
+[Ant Design](https://ant.design/) 
+
+2- Install react-common-admin
 ```bash
 npm i react-common-admin --save
 ```
+3- Init react-common-admin
 
+```bash
+import { initCommonAdmin } from  'react-common-admin';
+
+/* 
+	notification service -
+	You can pass a notification service and
+	react-common-admi will trigger a notification
+	in each put/post/delete action
+*/  
+const  notification  = {
+	success: (message) => console.log('success', message),
+	error: (message) => console.log('error', message),
+	info: (message) =>  console.log('info', message),
+	warning: (message) => console.log('warning', message),
+	warn: (message) =>  console.log('warn', message),
+}
+/* 
+	notification default messages -
+	You can pass a default notification messages
+*/  
+const  defaultDocumentMessages  = {
+	onPostMessage: 'Created successfully',
+	onPostFailedMessage: 'document - Created failed',
+	onPutMessage: 'Update successfully',
+	onPutFailedMessage: 'document - Update failed',
+	onDeleteMessage: ' Deleted successfully',
+	onDeleteFailedMessage: ' Deleted failed'
+}
+/*
+	document customTitle-
+	You can pass a function that get a
+	props and return the title to diaplay
+	in the document heade
+*/
+const  customTitle  =  function ({ state, props }) {
+	const { data } =  state;
+	const { objectId, schemaName, titleKey } =  props
+	let  title  =  '';
+	const  isNew  =  !objectId;
+	if (isNew) {
+	title  = `Create a New ${schemaName} document`
+	} else {
+	let  titleFromKey  = (titleKey  &&  data) ? data[titleKey] :  ''
+	let  hasTitle  = titleFromKey.length
+	title  = `Edit ${schemaName} document - ${hasTitle  ?  titleFromKey  :  objectId}`
+}
+return  title;
+}
+
+/*
+	langDir- You can set 'rtl' or 'ltr'
+*/
+const langDir = 'rtl'
+
+const  setParams  =  function (key, value) {
+	const href  =  `${Router.pathname}?${key}=${value}`
+	const  as  =  href
+	Router.push(href, as, { shallow:  true })
+}
+
+const  getParams  =  function () {
+	return  Router.query
+}
+
+//------ Init with all optional configurations:
+
+initCommonAdmin({ notification, defaultDocumentMessages, langDir, customTitle, setParams, getParams })
+```
 ## Basic Usage
 ```jsx
 import  React  from  'react';
 import {CommonAdmin, fields} from  'react-common-admin'
-import {DocFields, TableField} from  './config';
 
 const DocFields = [ // See react-cross-form
 {
@@ -65,6 +135,9 @@ onVisibleDocumentsChanged|function| Function that be call when VisibleDocuments 
 fetchExtraData|array|array of objects, each object is react-parse collection configuration <br />[{schemaName: 'Member', targetName: 'MemberData'}]<br/> The data will be avilable for you in the components
 documentProps|object <br/><small>required<small></small></small>| See documentProps
 collectionProps|object <br/><small>required<small></small></small>| See collectionProps
+openAsFullDoc|boolean<br/><small>default: true<small></small></small>|, set false if you want the document to open as a half screen
+paramSync|boolean<br/><small>default: true<small></small></small>|set false if you didnt want to sync visibleDocument with url parms
+refreshExtraDataOnRefresh|boolean<br/><small>default: true<small></small></small>|When true, react-parse will fetch data to all extra data and not only document/collection 
 
 ## documentProps
 | key | type | Description|
@@ -102,7 +175,7 @@ showCloseButton|boolean
 
 | key | type | Description|
 |-----|--|--|
-fields|array <br/><small>required<small></small></small>| [{key: 'objectId', title: 'Object Id', search: true, formatter: () => {}} ]
+fields|array <br/><small>required<small></small></small>| [{key: 'objectId', title: 'Object Id', search: true, formatter: (cell, row) => {}} ]
 viewComponent|element|See collention viewComponent props
 title|string|title to display
 limit|number|react-parse limit value , default is 10
@@ -144,7 +217,8 @@ tableProps|object| any props you want to pass to the viewComponent
 |-----|--|--|
 |renderAddBtn|function|funciton that get all table props and need to return a button|
 customOnEdit|function| funciton that be call when user click on edit button, with the row and all table props (rowObjectId, tableProps) => {...}
-renderAddBtn example 
+renderAddBtn example |
+disabledDelete|boolean|Set true to hide the delete button
 
 ```jsx
 renderSelectTypeToAdd(res) {
@@ -237,6 +311,27 @@ import {CommonAdmin, DraggableTable} from  'react-common-admin';
 		viewComponent:  DraggableTable,
 		tableProps: {
 			orderKey:  'orderKey' // in this case each document in the DB contain orderKey key with value that help us render the view by a specific order
+		// optional
+		groups: ['related', 'child'], // render data in separate tables
+		groupBy: 'relationType', // key to group value
+			
 		}
 ...
+```
+
+### customTitle
+When you init with customTitle you can use it like that:
+```
+import { CommonAdmin, customTitle } from  'react-common-admin'
+	<CommonAdmin
+		schemaName='Example'
+		targetName='ExampleScreen'
+		title='Example Screen'
+		documentProps={{
+		fields: DocFields, // Define this fields you want to render
+		customTitle: customTitle,
+		titleKey: 'firstName',
+		include: 'imageFromMedia'
+...
+}}
 ```
