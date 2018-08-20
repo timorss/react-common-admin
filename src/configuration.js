@@ -42,6 +42,14 @@ export const initCommonAdmin = function(res) {
     }
   }
 
+  if(res.customTitle) {
+    if(typeof res.customTitle !== 'function') {
+      console.log('customTitle need to be a function ({ state, props }) => {"string"} ')
+    }else{
+      customTitle = res.customTitle
+    }
+  }
+
   if(res.defaultDocumentMessages) {
     if(typeof res.defaultDocumentMessages === 'object') {
       // Show Warning if one of the methods are missing
@@ -63,9 +71,26 @@ export const initCommonAdmin = function(res) {
     }
   }
 
-  if(res.langDir){
+  if(res.langDir) {
     langDir = res.langDir;
+  }
+
+  if(res.setParams) {
+    setParams = res.setParams;
+  }
+  if(res.getParams) {
+    getParams = res.getParams;
   }
 }
 
+export let customTitle = function ({ state, props }) {
+  console.log('customTitle', { state, props })
+  return 'missing customTitle- use react-common-admin.initCommonAdmin({customTitle})'
+}
+export let setParams = function (paramsToSet) {
+  console.log('missing setParams- use react-common-admin.initCommonAdmin({setParams})')
+}
+export let getParams = function (paramsToSet) {
+  console.log('missing getParams- use react-common-admin.initCommonAdmin({getParams})')
+}
 /*eslint no-console: "off"*/

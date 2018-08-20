@@ -1,6 +1,6 @@
 {
   "name": "react-common-admin",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A react page container that works with [react-parse](https://www.npmjs.com/package/react-parse)  to fetch data from server and display as table/gallery or customs component.",
   "main": "lib/index.js",
   "scripts": {
@@ -34,8 +34,8 @@
     "moment": "^2.22.2",
     "prop-types": "^15.6.0",
     "react": "^16.3.0",
-    "react-cross-form": "^1.2.10",
-    "react-cross-inputs": "0.0.14"
+    "react-cross-form": "^1.2.11",
+    "react-cross-inputs": "0.0.15"
   },
   "devDependencies": {
     "babel-plugin-transform-runtime": "^6.23.0",

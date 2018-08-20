@@ -11,10 +11,11 @@ import {
 } from 'antd';
 
 import { buildQuery } from '../../utils/helpers';
+import { isEmptyString } from 'src/logic/helpers';
 
 const Search = Input.Search;
 
-export default class index extends Component {
+class ListWrapper extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -33,6 +34,15 @@ export default class index extends Component {
     this.renderDeleteButton = this.renderDeleteButton.bind(this);
     this.renderSearch = this.renderSearch.bind(this);
     this.onInputSearch = this.onInputSearch.bind(this);
+    this.onRefresh = this.onRefresh.bind(this);
+  }
+
+  onRefresh() {
+    const { fetchProps, onRefresh } = this.props;
+    fetchProps.refresh();
+    if(onRefresh) {
+      onRefresh()
+    }
   }
 
   renderSearch() {
@@ -162,11 +172,16 @@ export default class index extends Component {
   }
 
   onEdit() {
-    this.props.onEditDoc(this.props.selectedRows[0].objectId)
+    const rowId = this.props.selectedRows[0]
+    if(this.props.customOnEdit) {
+      this.props.customOnEdit(rowId, this.props)
+    }else{
+      this.props.onEditDoc(rowId, this.props)
+    }
   }
 
   onDelete() {
-    this.props.fetchProps.deleteDoc(this.props.selectedRows[0].objectId)
+    this.props.fetchProps.deleteDoc(this.props.selectedRows[0])
   }
 
   onInputSearch(e) {
@@ -174,27 +189,37 @@ export default class index extends Component {
   }
 
   render() {
-    const props = this.props;
-    const { fetchProps, isOneRowSelected } = props;
-    const { refresh } = fetchProps;
-    const isLoading = props.isLoading || fetchProps.isLoading;
+    const { fetchProps, isOneRowSelected, showPagination, showHeader, subTitle } = this.props;
+    const isLoading = this.props.isLoading || fetchProps.isLoading;
+    const hasSubTitle = ~isEmptyString(subTitle)
     return (
       <div className="rca-listWrapper-Screen">
-        {isLoading && <Spin className="rca-listWrapper-loader"/>}
-        <div className={'rca-listWrapper-header'}>
-          {this.renderSearch()}
-          <div className="rca-listWrapper-actions">
-            <Button type="secondary" className="rca-mL15" onClick={refresh} >Refresh</Button>
-            {isOneRowSelected && this.renderDeleteButton()}
-            {isOneRowSelected && <Button type="warning" onClick={this.onEdit} className="rca-mL15" >Edit</Button>}
-            {this.renderAddBtn()}
+        <div className="rca-listWrapper-Screen-Content">
+          {(isLoading && showHeader) && <Spin className="rca-listWrapper-loader"/>}
+          {showHeader && <div className={'rca-listWrapper-header'}>
+            {this.renderSearch()}
+            <div className="rca-listWrapper-actions">
+              <Button type="secondary" className="rca-mL15" onClick={this.onRefresh} >Refresh</Button>
+              {isOneRowSelected && this.renderDeleteButton()}
+              {isOneRowSelected && <Button type="warning" onClick={this.onEdit} className="rca-mL15" >Edit</Button>}
+              {this.renderAddBtn()}
+            </div>
           </div>
+          }
+          {hasSubTitle && <h3>{subTitle}</h3>}
+          <div className='rca-listWrapper-body'>
+            {this.props.children}
+          </div>
+          {showPagination && this.renderPagination()}
         </div>
-        <div className='rca-listWrapper-body'>
-          {this.props.children}
-        </div>
-        {this.renderPagination()}
       </div>
     );
   }
 }
+
+ListWrapper.defaultProps = {
+  showPagination: true,
+  showHeader: true,
+  onEditDoc: () => console.log('ListWrapper - missing onEditDoc')
+}
+export default ListWrapper;

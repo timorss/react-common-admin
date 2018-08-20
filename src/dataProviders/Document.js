@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FetchDocument } from 'react-parse'
-import {notification, defaultDocumentMessages} from '../configuration';
 
 export default class DocWrapper extends React.Component {
   constructor(props) {
@@ -9,54 +8,20 @@ export default class DocWrapper extends React.Component {
     this.state = {
       data: null
     }
-    this.onPostFinished = this.onPostFinished.bind(this);
-    this.onPutFinished = this.onPutFinished.bind(this);
-    this.onDeleteFinished = this.onDeleteFinished.bind(this);
     this.onFetchEnd = this.onFetchEnd.bind(this);
-    this.notification = this.notification.bind(this);
   }
 
   onFetchEnd({ error, status, data, info }) {
     this.setState({error, status, data, info})
   }
-  notification(type, messageKey, data) {
-    const messagesFromProps = this.props.messages || {};
-    if(!notification) {
-      console.log('react-common-admin - missing notification services, check react-common-admin.initCommonAdmin')
-    }else{
-      notification[type](messagesFromProps[messageKey] || defaultDocumentMessages[messageKey], data)
-    }
-  }
-
-  onPostFinished(res) {
-    this.props.onPostFinished(res)
-    if (res.error) {
-      this.notification('error', 'onPostFailedMessage', res)
-    } else{
-      this.notification('success', 'onPostMessage', res)
-    }
-  }
-
-  onPutFinished(res) {
-    this.props.onPutFinished(res)
-    if (res.error) {
-      this.notification('error', 'onPutFailedMessage', res)
-    } else{
-      this.notification('success', 'onPutMessage', res)
-    }
-  }
-
-  onDeleteFinished(res) {
-    this.props.onDeleteFinished(res)
-    if (res.error) {
-      this.notification('error', 'onDeleteFailedMessage', res)
-    } else{
-      this.notification('success', 'onDeleteMessage', res)
-    }
-  }
 
   render() {
-    const { isOpen, customTitle, onClose, saveOnBlur, targetName, schemaName, fields, objectId, viewComponent, extraData, fieldsOptions, messages, dataFromCollection,  ...resProps } = this.props
+    const { isOpen, customTitle, onClose, saveOnBlur,
+      targetName, schemaName, fields, objectId, viewComponent,
+      extraData, fieldsOptions, messages, dataFromCollection,
+      modalId, minimizedDocumentBeforeMe, toggleMinimized, toggleFullScreen,
+      onPostFinished, onDeleteFinished, onPutFinished, isMinimized, fullScreen, onRefresh,
+      ...resProps } = this.props
     const WrapperElement = this.props.wrapper
     const title = customTitle ? customTitle({state: this.state, props: this.props}) : (objectId ? `Edit - ${objectId}` : 'Create New Doc')
     return (
@@ -66,6 +31,12 @@ export default class DocWrapper extends React.Component {
         title={title}
         objectId={objectId}
         onClose={onClose}
+        modalId={modalId}
+        minimizedDocumentBeforeMe={minimizedDocumentBeforeMe}
+        isMinimized={isMinimized}
+        fullScreen={fullScreen}
+        toggleMinimized={toggleMinimized}
+        toggleFullScreen={toggleFullScreen}
       >
         <FetchDocument
           key={targetName}
@@ -75,9 +46,9 @@ export default class DocWrapper extends React.Component {
           leaveClean
           // Call backs
           onFetchEnd={this.onFetchEnd}
-          onPostEnd={this.onPostFinished}
-          onPutEnd={this.onPutFinished}
-          onDeleteEnd={this.onDeleteFinished}
+          onPostEnd={onPostFinished}
+          onPutEnd={onPutFinished}
+          onDeleteEnd={onDeleteFinished}
           // Info that will pass to viewComponent
           // -- Method to close modal
           onClose={onClose}
@@ -87,10 +58,13 @@ export default class DocWrapper extends React.Component {
           fields={fields}
           collectionTargetName={this.props.collectionTargetName}
           fieldsOptions={fieldsOptions}
+          extraData={extraData}
           component={viewComponent}
           title={title}
           messages={messages}
+          modalId={modalId}
           dataFromCollection={dataFromCollection}
+          onRefresh={onRefresh}
           {...resProps}
         />
       </WrapperElement>

@@ -3,7 +3,6 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -14,6 +13,8 @@ var _react2 = _interopRequireDefault(_react);
 var _antd = require('antd');
 
 var _helpers = require('../../utils/helpers');
+
+var _helpers2 = require('src/logic/helpers');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -27,13 +28,13 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 var Search = _antd.Input.Search;
 
-var index = function (_Component) {
-  _inherits(index, _Component);
+var ListWrapper = function (_Component) {
+  _inherits(ListWrapper, _Component);
 
-  function index(props) {
-    _classCallCheck(this, index);
+  function ListWrapper(props) {
+    _classCallCheck(this, ListWrapper);
 
-    var _this = _possibleConstructorReturn(this, (index.__proto__ || Object.getPrototypeOf(index)).call(this, props));
+    var _this = _possibleConstructorReturn(this, (ListWrapper.__proto__ || Object.getPrototypeOf(ListWrapper)).call(this, props));
 
     _this.state = {
       searchText: '',
@@ -51,10 +52,23 @@ var index = function (_Component) {
     _this.renderDeleteButton = _this.renderDeleteButton.bind(_this);
     _this.renderSearch = _this.renderSearch.bind(_this);
     _this.onInputSearch = _this.onInputSearch.bind(_this);
+    _this.onRefresh = _this.onRefresh.bind(_this);
     return _this;
   }
 
-  _createClass(index, [{
+  _createClass(ListWrapper, [{
+    key: 'onRefresh',
+    value: function onRefresh() {
+      var _props = this.props,
+          fetchProps = _props.fetchProps,
+          onRefresh = _props.onRefresh;
+
+      fetchProps.refresh();
+      if (onRefresh) {
+        onRefresh();
+      }
+    }
+  }, {
     key: 'renderSearch',
     value: function renderSearch() {
       return _react2.default.createElement(
@@ -95,9 +109,9 @@ var index = function (_Component) {
   }, {
     key: 'renderAddBtn',
     value: function renderAddBtn() {
-      var _props = this.props,
-          onCreateNewDoc = _props.onCreateNewDoc,
-          renderAddBtn = _props.renderAddBtn;
+      var _props2 = this.props,
+          onCreateNewDoc = _props2.onCreateNewDoc,
+          renderAddBtn = _props2.renderAddBtn;
 
       if (renderAddBtn) {
         return renderAddBtn(this.props);
@@ -217,21 +231,26 @@ var index = function (_Component) {
   }, {
     key: 'onPageChange',
     value: function onPageChange(page, pageSize) {
-      var _props2 = this.props,
-          onSkipChanged = _props2.onSkipChanged,
-          limit = _props2.limit;
+      var _props3 = this.props,
+          onSkipChanged = _props3.onSkipChanged,
+          limit = _props3.limit;
 
       onSkipChanged(page * limit);
     }
   }, {
     key: 'onEdit',
     value: function onEdit() {
-      this.props.onEditDoc(this.props.selectedRows[0].objectId);
+      var rowId = this.props.selectedRows[0];
+      if (this.props.customOnEdit) {
+        this.props.customOnEdit(rowId, this.props);
+      } else {
+        this.props.onEditDoc(rowId, this.props);
+      }
     }
   }, {
     key: 'onDelete',
     value: function onDelete() {
-      this.props.fetchProps.deleteDoc(this.props.selectedRows[0].objectId);
+      this.props.fetchProps.deleteDoc(this.props.selectedRows[0]);
     }
   }, {
     key: 'onInputSearch',
@@ -241,48 +260,67 @@ var index = function (_Component) {
   }, {
     key: 'render',
     value: function render() {
-      var props = this.props;
-      var fetchProps = props.fetchProps,
-          isOneRowSelected = props.isOneRowSelected;
-      var refresh = fetchProps.refresh;
+      var _props4 = this.props,
+          fetchProps = _props4.fetchProps,
+          isOneRowSelected = _props4.isOneRowSelected,
+          showPagination = _props4.showPagination,
+          showHeader = _props4.showHeader,
+          subTitle = _props4.subTitle;
 
-      var isLoading = props.isLoading || fetchProps.isLoading;
+      var isLoading = this.props.isLoading || fetchProps.isLoading;
+      var hasSubTitle = ~(0, _helpers2.isEmptyString)(subTitle);
       return _react2.default.createElement(
         'div',
         { className: 'rca-listWrapper-Screen' },
-        isLoading && _react2.default.createElement(_antd.Spin, { className: 'rca-listWrapper-loader' }),
         _react2.default.createElement(
           'div',
-          { className: 'rca-listWrapper-header' },
-          this.renderSearch(),
+          { className: 'rca-listWrapper-Screen-Content' },
+          isLoading && showHeader && _react2.default.createElement(_antd.Spin, { className: 'rca-listWrapper-loader' }),
+          showHeader && _react2.default.createElement(
+            'div',
+            { className: 'rca-listWrapper-header' },
+            this.renderSearch(),
+            _react2.default.createElement(
+              'div',
+              { className: 'rca-listWrapper-actions' },
+              _react2.default.createElement(
+                _antd.Button,
+                { type: 'secondary', className: 'rca-mL15', onClick: this.onRefresh },
+                'Refresh'
+              ),
+              isOneRowSelected && this.renderDeleteButton(),
+              isOneRowSelected && _react2.default.createElement(
+                _antd.Button,
+                { type: 'warning', onClick: this.onEdit, className: 'rca-mL15' },
+                'Edit'
+              ),
+              this.renderAddBtn()
+            )
+          ),
+          hasSubTitle && _react2.default.createElement(
+            'h3',
+            null,
+            subTitle
+          ),
           _react2.default.createElement(
             'div',
-            { className: 'rca-listWrapper-actions' },
-            _react2.default.createElement(
-              _antd.Button,
-              { type: 'secondary', className: 'rca-mL15', onClick: refresh },
-              'Refresh'
-            ),
-            isOneRowSelected && this.renderDeleteButton(),
-            isOneRowSelected && _react2.default.createElement(
-              _antd.Button,
-              { type: 'warning', onClick: this.onEdit, className: 'rca-mL15' },
-              'Edit'
-            ),
-            this.renderAddBtn()
-          )
-        ),
-        _react2.default.createElement(
-          'div',
-          { className: 'rca-listWrapper-body' },
-          this.props.children
-        ),
-        this.renderPagination()
+            { className: 'rca-listWrapper-body' },
+            this.props.children
+          ),
+          showPagination && this.renderPagination()
+        )
       );
     }
   }]);
 
-  return index;
+  return ListWrapper;
 }(_react.Component);
 
-exports.default = index;
+ListWrapper.defaultProps = {
+  showPagination: true,
+  showHeader: true,
+  onEditDoc: function onEditDoc() {
+    return console.log('ListWrapper - missing onEditDoc');
+  }
+};
+exports.default = ListWrapper;

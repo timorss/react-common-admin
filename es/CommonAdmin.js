@@ -30,15 +30,24 @@ var _Collection = require('./dataProviders/Collection');
 
 var _Collection2 = _interopRequireDefault(_Collection);
 
+var _find = require('lodash/find');
+
+var _find2 = _interopRequireDefault(_find);
+
+var _configuration = require('./configuration');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } // ### CommonAdmin docs: https://github.com/doronnahum/react-common-admin
+
 
 var Page = function (_React$Component) {
   _inherits(Page, _React$Component);
@@ -49,10 +58,9 @@ var Page = function (_React$Component) {
     var _this = _possibleConstructorReturn(this, (Page.__proto__ || Object.getPrototypeOf(Page)).call(this, props));
 
     _this.state = {
-      showDocumentModal: false,
-      currentDocId: null,
+      visibleDocuments: [/* {id: string, isOpen: boolean, dataFromCollection: {...}}, newDoc: boolean, isMinimized: boolean, fullScreen: boolean */],
       docKey: 0,
-      dataFromCollection: null
+      fetchExtraDataKey: 0
     };
     _this.onCreateNewDoc = _this.onCreateNewDoc.bind(_this);
     _this.onEditDoc = _this.onEditDoc.bind(_this);
@@ -61,112 +69,148 @@ var Page = function (_React$Component) {
     _this.onDeleteFinished = _this.onDeleteFinished.bind(_this);
     _this.onPutFinished = _this.onPutFinished.bind(_this);
     _this.renderCollection = _this.renderCollection.bind(_this);
-    _this.renderDocument = _this.renderDocument.bind(_this);
-    _this.increaseDocKey = _this.increaseDocKey.bind(_this);
-    _this.convertExtraDataToFieldsOptions = _this.convertExtraDataToFieldsOptions.bind(_this);
+    _this.renderDocuments = _this.renderDocuments.bind(_this);
+    _this.getExtraDataAsFieldsOptions = _this.getExtraDataAsFieldsOptions.bind(_this);
+    _this.notification = _this.notification.bind(_this);
+    _this.getVisibleDocuments = _this.getVisibleDocuments.bind(_this);
+    _this.parseDataBeforePost = _this.parseDataBeforePost.bind(_this);
+    _this.parseDataBeforePut = _this.parseDataBeforePut.bind(_this);
+    _this.toggleFullScreen = _this.toggleFullScreen.bind(_this);
+    _this.toggleMinimized = _this.toggleMinimized.bind(_this);
+    _this.syncParamOnLoad = _this.syncParamOnLoad.bind(_this);
+    _this.onRefresh = _this.onRefresh.bind(_this);
+    _this.minimizedDocumentBeforeMe = 0;
+    _this.lastVisibleDocumentsLength = null;
     return _this;
   }
 
   _createClass(Page, [{
-    key: 'onPostFinished',
-    value: function onPostFinished(_ref) {
-      var error = _ref.error,
-          status = _ref.status,
-          data = _ref.data,
-          info = _ref.info;
+    key: 'componentDidMount',
+    value: function componentDidMount() {
+      this.syncParamOnLoad();
+    }
+  }, {
+    key: 'notification',
 
-      if (error) {
-        console.log('Post faield', error);
+
+    /**
+     * @function notification
+     * @param {*} type oneOf 'error', 'success', 'info', 'warning'
+     * @param {*} messageKey oneOf 'onPostMessage','onPostFailedMessage','onPutMessage','onDeleteMessage','onDeleteFailedMessage'
+     * @param {*} data object
+     * This is a wrapper of notification service that help to use defaultDocumentMessages when messagesFromProps is didn't found
+     */
+    value: function notification(type, messageKey, data) {
+      var messagesFromProps = this.props.messages || {};
+      if (!_configuration.notification) {
+        console.log('react-common-admin - missing notification services, check react-common-admin.initCommonAdmin');
       } else {
-        _reactParse.collectionActions.refreshCollection({
-          targetName: this.props.targetName
-        });
-        this.setState({ currentDocId: info.objectId, showDocumentModal: true });
+        _configuration.notification[type](messagesFromProps[messageKey] || _configuration.defaultDocumentMessages[messageKey], data);
       }
     }
+
+    // ---- react-parse callbacks ----- //
+
+    /**
+     * @function onPostFinished
+     * @param {object} res react-parse onPostFinished response
+     */
+
+  }, {
+    key: 'onPostFinished',
+    value: function onPostFinished(res) {
+      var error = res.error,
+          boomerang = res.boomerang;
+
+      if (error) {
+        this.notification('error', 'onPostFailedMessage', res);
+      } else {
+        _reactParse.collectionActions.refreshCollection({ targetName: this.props.targetName });
+        this.closeDocumentModal(boomerang.modalId);
+        this.notification('success', 'onPostMessage', res);
+      }
+      if (this.props.documentProps.onPostFinished) {
+        this.props.documentProps.onPostFinished(res);
+      }
+    }
+
+    /**
+     * @function onDeleteFinished
+     * @param {object} res react-parse onDeleteFinished response
+     */
+
   }, {
     key: 'onDeleteFinished',
-    value: function onDeleteFinished(_ref2) {
-      var error = _ref2.error,
-          status = _ref2.status,
-          data = _ref2.data,
-          info = _ref2.info;
+    value: function onDeleteFinished(res) {
+      var error = res.error,
+          boomerang = res.boomerang;
 
       if (error) {
-        console.log('Delete faield', error);
+        this.notification('error', 'onDeleteFailedMessage', res);
       } else {
         _reactParse.collectionActions.refreshCollection({
           targetName: this.props.targetName
         });
-        this.setState({ currentDocId: null, showDocumentModal: false });
+        this.closeDocumentModal(boomerang.modalId);
+        this.notification('success', 'onDeleteMessage', res);
+      }
+      if (this.props.documentProps.onDeleteFinished) {
+        this.props.documentProps.onDeleteFinished(res);
       }
     }
+
+    /**
+     * @function onPutFinished
+     * @param {object} res react-parse onPutFinished response
+     */
+
   }, {
     key: 'onPutFinished',
-    value: function onPutFinished(_ref3) {
-      var error = _ref3.error,
-          status = _ref3.status,
-          data = _ref3.data,
-          info = _ref3.info;
+    value: function onPutFinished(res) {
+      var error = res.error;
 
       if (error) {
-        //alert('onPutFinished faield', error)
+        this.notification('error', 'onPutFailedMessage', res);
       } else {
         _reactParse.collectionActions.refreshCollection({
           targetName: this.props.targetName
         });
+        this.notification('success', 'onPutMessage', res);
+      }
+      if (this.props.documentProps.onPutFinished) {
+        this.props.documentProps.onPutFinished(res);
       }
     }
-  }, {
-    key: 'closeDocumentModal',
-    value: function closeDocumentModal() {
-      var _this2 = this;
 
-      this.setState({ showDocumentModal: false, currentDocId: null, dataFromCollection: null }, function () {
-        return _this2.props.onShowDocumentModal(false);
-      });
-    }
-  }, {
-    key: 'onCreateNewDoc',
-    value: function onCreateNewDoc(dataFromCollection) {
-      var _this3 = this;
+    /**
+     * @function onRefresh
+     * This function will trigger by collection/document viewComponent refresh button
+     */
 
-      console.log({ dataFromCollection: dataFromCollection });
-      this.setState({
-        showDocumentModal: true,
-        currentDocId: null,
-        dataFromCollection: dataFromCollection,
-        docKey: this.increaseDocKey()
-      }, function () {
-        return _this3.props.onShowDocumentModal(true);
-      });
-    }
   }, {
-    key: 'increaseDocKey',
-    value: function increaseDocKey() {
-      return this.state.docKey + 1;
+    key: 'onRefresh',
+    value: function onRefresh() {
+      if (this.props.refreshExtraDataOnRefresh) {
+        this.setState({ fetchExtraDataKey: this.state.fetchExtraDataKey + 1 }); // Change key will trigger react-parse fetch
+      }
     }
-  }, {
-    key: 'onEditDoc',
-    value: function onEditDoc(docId, dataFromCollection) {
-      var _this4 = this;
 
-      this.setState({
-        showDocumentModal: true,
-        currentDocId: docId,
-        dataFromCollection: dataFromCollection,
-        docKey: this.increaseDocKey()
-      }, function () {
-        return _this4.props.onShowDocumentModal(true);
-      });
-    }
+    // ---- Data handlers ----- //
+    /**
+     * @function handleFetchExtraData
+     * @param {array} fetchExtraData array of object, each object is react-parse FetchCollection props
+     * We Use this data to fetch data from server to inputs dropDown or display in the table with special formatter
+     */
+
   }, {
     key: 'handleFetchExtraData',
     value: function handleFetchExtraData(fetchExtraData) {
+      var _this2 = this;
+
       if (fetchExtraData) {
         return fetchExtraData.map(function (item) {
           return _react2.default.createElement(_reactParse.FetchCollection, _extends({
-            key: item.targetName,
+            key: item.targetName + '-' + _this2.state.fetchExtraDataKey,
             render: function render() {
               return null;
             }
@@ -174,20 +218,22 @@ var Page = function (_React$Component) {
         });
       }
     }
+
+    /**
+     * @function getExtraDataAsFieldsOptions
+     * This function will return fetch data as an object, split by fields targetName
+     * and each input will get is own options
+     */
+
   }, {
-    key: 'convertExtraDataToFieldsOptions',
-    value: function convertExtraDataToFieldsOptions() {
+    key: 'getExtraDataAsFieldsOptions',
+    value: function getExtraDataAsFieldsOptions() {
       var _props = this.props,
           extraData = _props.extraData,
           documentProps = _props.documentProps;
       var fields = documentProps.fields;
 
-      console.log({ extraData: extraData, fields: fields });
       var fieldsOptions = {};
-      /*
-          extraData is object of data collection by targetNames,
-          fieldsOptions need to be an object of extraData by fieldKey, each field get is data by field.targetName
-        */
       if (extraData) {
         fieldsOptions.all = extraData;
         fields.forEach(function (field) {
@@ -199,17 +245,187 @@ var Page = function (_React$Component) {
           }
         });
       }
-      console.log('fieldsOptions0', fieldsOptions);
       return fieldsOptions;
     }
+
+    /**
+     * @function parseDataBeforePost
+     * @param {*} data data to send the server
+     * This function allows to manipulate the data outside the document from before we post to server
+     */
+
   }, {
-    key: 'renderDocument',
-    value: function renderDocument() {
-      var _state = this.state,
-          showDocumentModal = _state.showDocumentModal,
-          currentDocId = _state.currentDocId,
-          docKey = _state.docKey,
-          dataFromCollection = _state.dataFromCollection;
+    key: 'parseDataBeforePost',
+    value: function parseDataBeforePost(data) {
+      var parseDataBeforePost = this.props.documentProps.parseDataBeforePost;
+
+      if (parseDataBeforePost) {
+        var tableProps = this.collectionViewRef.props;
+        return parseDataBeforePost(data, tableProps);
+      } else {
+        return data;
+      }
+    }
+
+    /**
+     * @function parseDataBeforePut
+     * @param {*} data data to send the server
+     * This function allows to manipulate the data outside the document from before we put to server
+     */
+
+  }, {
+    key: 'parseDataBeforePut',
+    value: function parseDataBeforePut(data, objectId, fetchProps) {
+      var parseDataBeforePut = this.props.documentProps.parseDataBeforePut;
+
+      if (parseDataBeforePut) {
+        var tableProps = this.collectionViewRef.props;
+        return parseDataBeforePut(data, tableProps, objectId, fetchProps);
+      } else {
+        return data;
+      }
+    }
+
+    // ---- Documents visible handlers ----- //
+
+    /**
+     * @function syncParamOnLoad
+     * This function mange initial visibleDocuments from url params
+     */
+
+  }, {
+    key: 'syncParamOnLoad',
+    value: function syncParamOnLoad() {
+      if (this.props.paramSync) {
+        var params = (0, _configuration.getParams)() || {};
+        var visibleDocumentsFromParams = params.visibleDocuments;
+        if (visibleDocumentsFromParams) {
+          this.setState({ visibleDocuments: JSON.parse(visibleDocumentsFromParams) });
+        }
+      }
+    }
+
+    /**
+     * @function getVisibleDocuments
+     * This function return all visibleDocuments from state
+     * default document - When documentProps include objectId then this document added as a default document
+     */
+
+  }, {
+    key: 'getVisibleDocuments',
+    value: function getVisibleDocuments() {
+      var documentProps = this.props.documentProps;
+
+      var visibleDocuments = [].concat(_toConsumableArray(this.state.visibleDocuments));
+      if (documentProps.objectId) {
+        visibleDocuments.push({ id: documentProps.objectId, isOpen: true });
+      }
+      return visibleDocuments;
+    }
+
+    /**
+     * @function onCreateNewDoc
+     * @param {object} dataFromCollection Data that pass from table row to document
+     */
+
+  }, {
+    key: 'onCreateNewDoc',
+    value: function onCreateNewDoc(dataFromCollection) {
+      var openAsFullDoc = this.props.openAsFullDoc;
+
+      var visibleDocuments = [].concat(_toConsumableArray(this.state.visibleDocuments));
+      var _dataFromCollection = dataFromCollection && dataFromCollection.target ? null : dataFromCollection; // we didn't want input event
+      visibleDocuments.push({ id: 'new' + this.state.docKey, isOpen: true, dataFromCollection: _dataFromCollection, newDoc: true, fullScreen: openAsFullDoc, isMinimized: false });
+      this.setState({ docKey: this.state.docKey + 1 });
+      this.setVisibleDocuments(visibleDocuments);
+    }
+
+    /**
+     * @function onEditDoc
+     * @param {string} docId document object id
+     * @param {object} dataFromCollection Data that pass from table row to document
+     */
+
+  }, {
+    key: 'onEditDoc',
+    value: function onEditDoc(docId, dataFromCollection) {
+      var openAsFullDoc = this.props.openAsFullDoc;
+
+      var isDocumentIsAlreadyOpen = (0, _find2.default)(this.state.visibleDocuments, function (obj) {
+        return obj.id === docId;
+      });
+      if (isDocumentIsAlreadyOpen) {
+        _configuration.notification.info('This document is already in use');
+      } else {
+        var visibleDocuments = [].concat(_toConsumableArray(this.state.visibleDocuments));
+        var _dataFromCollection = dataFromCollection && dataFromCollection.target ? null : dataFromCollection; // we didn't want input event
+        visibleDocuments.push({ id: docId, isOpen: true, dataFromCollection: _dataFromCollection, fullScreen: openAsFullDoc, isMinimized: false });
+        this.setVisibleDocuments(visibleDocuments);
+      }
+    }
+
+    /**
+     * function closeDocumentModal
+     * @param {string} modalId each Document have a unique key, objectId for existing docs and `new${this.state.docKey}` for new ones
+     */
+
+  }, {
+    key: 'closeDocumentModal',
+    value: function closeDocumentModal(modalId) {
+      var visibleDocuments = this.state.visibleDocuments.filter(function (item) {
+        return item.id !== modalId;
+      });
+      this.setVisibleDocuments(visibleDocuments);
+    }
+  }, {
+    key: 'toggleMinimized',
+    value: function toggleMinimized(modalId) {
+      var visibleDocuments = this.state.visibleDocuments.map(function (item) {
+        if (item.id === modalId) {
+          item.isMinimized = !item.isMinimized;
+        }
+        return item;
+      });
+      this.setVisibleDocuments(visibleDocuments);
+    }
+  }, {
+    key: 'toggleFullScreen',
+    value: function toggleFullScreen(modalId) {
+      var visibleDocuments = this.state.visibleDocuments.map(function (item) {
+        if (item.id === modalId) {
+          item.fullScreen = !item.fullScreen;
+        }
+        return item;
+      });
+      this.setVisibleDocuments(visibleDocuments);
+    }
+  }, {
+    key: 'setVisibleDocuments',
+    value: function setVisibleDocuments(visibleDocuments) {
+      this.setState({ visibleDocuments: visibleDocuments });
+      if (this.props.onVisibleDocumentsChanged) {
+        if (this.lastVisibleDocumentsLength !== visibleDocuments.length) {
+          this.lastVisibleDocumentsLength = visibleDocuments.length;
+          this.props.onVisibleDocumentsChanged(visibleDocuments.length);
+        }
+      }
+      if (this.props.paramSync) {
+        (0, _configuration.setParams)('visibleDocuments', JSON.stringify(visibleDocuments));
+      }
+    }
+
+    /**
+     * @function renderDocuments
+     * This function render Document for each of the visibleDocuments
+     * Document is a react-parse FetchDocument with a wrapper around docForm
+     * The wrapper is from react-common-admin usual is a modal or side modal
+     */
+
+  }, {
+    key: 'renderDocuments',
+    value: function renderDocuments() {
+      var _this3 = this;
+
       var _props2 = this.props,
           targetName = _props2.targetName,
           schemaName = _props2.schemaName,
@@ -218,59 +434,99 @@ var Page = function (_React$Component) {
           showCollection = _props2.showCollection;
 
       var fields = documentProps.fields,
+          showCloseButton = documentProps.showCloseButton,
+          showDeleteButton = documentProps.showDeleteButton,
           wrapper = documentProps.wrapper,
           viewComponent = documentProps.viewComponent,
-          parseDataBeforePost = documentProps.parseDataBeforePost,
           saveOnBlur = documentProps.saveOnBlur,
           skip = documentProps.skip,
           limit = documentProps.limit,
           query = documentProps.query,
           onLimitChanged = documentProps.onLimitChanged,
+          parseDataBeforePost = documentProps.parseDataBeforePost,
+          parseDataBeforePut = documentProps.parseDataBeforePut,
           onSkipChanged = documentProps.onSkipChanged,
           onOrderChanged = documentProps.onOrderChanged,
           onQueryChanged = documentProps.onQueryChanged,
           messages = documentProps.messages,
-          resDocumentProps = _objectWithoutProperties(documentProps, ['fields', 'wrapper', 'viewComponent', 'parseDataBeforePost', 'saveOnBlur', 'skip', 'limit', 'query', 'onLimitChanged', 'onSkipChanged', 'onOrderChanged', 'onQueryChanged', 'messages']);
+          resDocumentProps = _objectWithoutProperties(documentProps, ['fields', 'showCloseButton', 'showDeleteButton', 'wrapper', 'viewComponent', 'saveOnBlur', 'skip', 'limit', 'query', 'onLimitChanged', 'parseDataBeforePost', 'parseDataBeforePut', 'onSkipChanged', 'onOrderChanged', 'onQueryChanged', 'messages']);
 
-      var documentTargetName = targetName + '-' + (currentDocId || 'new_doc');
-      return _react2.default.createElement(_Document2.default, _extends({
-        key: '' + documentTargetName + docKey // important key- new components instance
-        // ---react-parse---
-        // data
-        , targetName: documentTargetName,
-        schemaName: schemaName,
-        objectId: currentDocId
-        // callbacks
-        , onPostFinished: this.onPostFinished,
-        onDeleteFinished: this.onDeleteFinished,
-        onPutFinished: this.onPutFinished,
-        collectionTargetName: targetName
-        // extraData is pass as fieldsOptions, field with targetName will get data from extraData
-        , fieldsOptions: this.convertExtraDataToFieldsOptions(),
-        extraData: extraData
-        // ---View---
-        // wrapper component
-        , wrapper: wrapper || _index.SideModal
-        // pass to wrapper component - toggle to show/hide the document
-        , isOpen: showDocumentModal || !showCollection,
-        onClose: this.closeDocumentModal
-        // this is the view that get all document props {onClose, objectId, saveOnBlur, fetchProps, fields, extraData, ...documentProps}, fetchProps is react-parse response
-        , viewComponent: viewComponent || _index.DocForm,
-        parseDataBeforePost: parseDataBeforePost,
-        saveOnBlur: saveOnBlur,
-        fields: fields,
-        query: query,
-        onLimitChanged: onLimitChanged,
-        onSkipChanged: onSkipChanged,
-        onOrderChanged: onOrderChanged,
-        onQueryChanged: onQueryChanged,
-        messages: messages,
-        dataFromCollection: dataFromCollection
-      }, resDocumentProps));
+      var visibleDocuments = this.getVisibleDocuments();
+      this.minimizedDocumentBeforeMe = 0; // reset the minimizedDocumentBeforeMe, We count it when visibleDocuments.map is running
+      return visibleDocuments.map(function (_ref) {
+        var id = _ref.id,
+            isOpen = _ref.isOpen,
+            dataFromCollection = _ref.dataFromCollection,
+            newDoc = _ref.newDoc,
+            isMinimized = _ref.isMinimized,
+            fullScreen = _ref.fullScreen;
+
+        var isNew = newDoc;
+        var documentTargetName = targetName + '-' + id;
+        var isDocumentOpen = isOpen || !showCollection; // When showCollection is false then document is always Open
+        var _minimizedDocumentBeforeMe = _this3.minimizedDocumentBeforeMe;
+        if (isMinimized) {
+          _this3.minimizedDocumentBeforeMe++;
+        }
+        return _react2.default.createElement(_Document2.default, _extends({}, resDocumentProps, {
+          key: documentTargetName
+          // ---react-parse---
+          // data
+          , targetName: documentTargetName,
+          schemaName: schemaName,
+          objectId: isNew ? null : id
+          // callbacks
+          , onPostFinished: _this3.onPostFinished,
+          onDeleteFinished: _this3.onDeleteFinished,
+          onPutFinished: _this3.onPutFinished,
+          collectionTargetName: targetName
+          // extraData is pass as fieldsOptions, field with targetName will get data from extraData
+          , fieldsOptions: _this3.getExtraDataAsFieldsOptions(),
+          extraData: extraData
+          // ---View---
+          // wrapper component
+          , wrapper: wrapper || _index.SideModal,
+          showCloseButton: showCloseButton,
+          showDeleteButton: showDeleteButton,
+          minimizedDocumentBeforeMe: _minimizedDocumentBeforeMe || 0 // We need this value to Know what is the right margin From right when documents are minimized
+          , modalId: id,
+          isMinimized: isMinimized,
+          fullScreen: fullScreen,
+          toggleMinimized: _this3.toggleMinimized,
+          toggleFullScreen: _this3.toggleFullScreen
+          // pass to wrapper component - toggle to show/hide the document
+          , isOpen: isDocumentOpen,
+          onClose: _this3.closeDocumentModal
+          // this is the view that get all document props {onClose, objectId, saveOnBlur, fetchProps, fields, extraData, ...documentProps}, fetchProps is react-parse response
+          , viewComponent: viewComponent || _index.DocForm,
+          parseDataBeforePost: _this3.parseDataBeforePost,
+          parseDataBeforePut: _this3.parseDataBeforePut,
+          saveOnBlur: saveOnBlur,
+          fields: fields,
+          query: query,
+          onLimitChanged: onLimitChanged,
+          onSkipChanged: onSkipChanged,
+          onOrderChanged: onOrderChanged,
+          onQueryChanged: onQueryChanged,
+          messages: messages,
+          dataFromCollection: dataFromCollection,
+          onRefresh: _this3.onRefresh
+        }));
+      });
     }
+
+    /**
+     * @function renderCollection
+     * This function render Collection
+     * Collection is a react-parse FetchCollection that handle the query, pagination
+     * and render Table or other viewComponent to screen
+     */
+
   }, {
     key: 'renderCollection',
     value: function renderCollection() {
+      var _this4 = this;
+
       var _props3 = this.props,
           showLoader = _props3.showLoader,
           title = _props3.title,
@@ -287,7 +543,13 @@ var Page = function (_React$Component) {
           resCollectionProps = _objectWithoutProperties(collectionProps, ['fields', 'viewComponent', 'dataHandler', 'tableProps']);
 
       return _react2.default.createElement(_Collection2.default, _extends({
-        key: schemaName
+        key: schemaName,
+        ref: function ref(_ref2) {
+          _this4.collectionRef = _ref2;
+        },
+        onViewRef: function onViewRef(ref) {
+          _this4.collectionViewRef = ref;
+        }
         // ---react-parse---
         // data
         , schemaName: schemaName,
@@ -307,8 +569,9 @@ var Page = function (_React$Component) {
         onEditDoc: this.onEditDoc,
         extraData: extraData,
         showLoader: showLoader
-        // this is the view that get all collection props {title, onQueryChanged,skip,limit,fetchProps,showLoader,onEditDoc,onCreateNewDoc,extraData   ...collectionProps}, fetchProps is react-parse response
-        , viewComponent: viewComponent || _index.Table
+        // this is the view that get all collection props {onQueryChanged,skip,limit,fetchProps,showLoader,onEditDoc,onCreateNewDoc,extraData   ...collectionProps}, fetchProps is react-parse response
+        , viewComponent: viewComponent || _index.Table,
+        onRefresh: this.onRefresh
       }, tableProps, resCollectionProps));
     }
   }, {
@@ -334,10 +597,10 @@ var Page = function (_React$Component) {
             _index.Layout.Content,
             { className: 'rca-main-pageContent' },
             showCollection && this.renderCollection(),
-            !showCollection && this.renderDocument()
+            !showCollection && this.renderDocuments()
           )
         ),
-        showCollection && this.renderDocument(),
+        showCollection && this.renderDocuments(),
         this.handleFetchExtraData(this.props.fetchExtraData)
       );
     }
@@ -346,9 +609,9 @@ var Page = function (_React$Component) {
   return Page;
 }(_react2.default.Component);
 
-var mapStateToProps = function mapStateToProps(state, _ref4) {
-  var targetName = _ref4.targetName,
-      fetchExtraData = _ref4.fetchExtraData;
+var mapStateToProps = function mapStateToProps(state, _ref3) {
+  var targetName = _ref3.targetName,
+      fetchExtraData = _ref3.fetchExtraData;
 
   var extraData = void 0;
   if (fetchExtraData) {
@@ -368,97 +631,12 @@ exports.default = (0, _reactRedux.connect)(mapStateToProps, null)(Page);
 
 
 Page.defaultProps = {
-  onShowDocumentModal: function onShowDocumentModal() {},
   showPageHeader: true,
-  showCollection: true
+  showCollection: true,
+  openAsFullDoc: true,
+  paramSync: true,
+  refreshExtraDataOnRefresh: true
 };
 Page.propTypes = process.env.NODE_ENV !== "production" ? {
   showPageHeader: _propTypes2.default.bool
 } : {};
-
-/*
-### CommonAdmin
-
-
-```jsx
-<CommonAdmin
-  title - string - title to display
-  targetName - string - react-parse targetName
-  schemaName - string - react-parse schemaName
-  functionName - string - react-parse functionName (for using react-parse FetchCloudCode) - TODO // missing collection delete in this situation
-  onShowDocumentModal - function - call back that call when DocumentModal is changed
-  fetchExtraData - array - array of objects, each object is react-parse collection configuration  {schemaName: 'Member', targetName: 'MemberData'}
-  documentProps - object - {
-    fields - array - react-cross-form fields to render
-    wrapper - element - optional - You can replace the default side modal wrapper , wrapper get this props (isOpen, onClose,title, children)
-    viewComponent - element - optional - You can replace the default form,
-    messages : object - {
-      // You can display a custom message, this data will pass to your notification service, see react-common-admin initCommonAdmin
-      onPostMessage: 'Create successfully',
-      onPostFailedMessage: 'Create failed',
-      onPutMessage: 'Update successfully',
-      onPutFailedMessage: 'Update failed',
-      onDeleteMessage: 'Deleted successfully',
-      onDeleteFailedMessage: 'Deleted failed',
-    },
-    parseDataBeforePost - function - optional - function that call with the data before post, (data) => {return ({...data, {test: 1})}
-    saveOnBlur - boolean - default is true, run react-parse put when input is blur
-    title - string - title to display
-    customTitle - function -  function that get {state, props} and return string as title
-    // You can addd in this any parameters you want and the will pass to your viewComponent
-  },
-  collectionProps - object - {
-    fields - array - this is the field that pass to viewComponent, [{key: 'objectId', title: 'Object Id', search: true, formatter: () => {}} ]
-    viewComponent - element - optional - You can replace the default Table,
-    dataHandler - function - if you using cloud code as collection data, see react parse dataHandler
-    limit - number- react-parse limit value , default is 10
-    skip - number- react-parse skip value , default is 0,
-    order - string - react-parse string, default is 'createdAt'
-    query - object - react-parse query, default is {}
-    // optional function handler that be call and return a new value
-    // if you didn't pass this handlers than you limit and skip is used as initial value 
-    onLimitChanged (number)
-    onSkipChanged (number)
-    onOrderChanged, (string)
-    onQueryChanged, (object)
-    onPagination // (page,size)
-  }
-/>
-```
-
-### documentProps.viewComponent
-Your view component will get this props {
-  fetchProps - see react-parse FetchDocument fetchProps {data, error, status, info. isLoading, refresh, cleanData, put, post, deleteDoc, updateField}
-  onClose, - function - call to close modal
-  isOpen - boolean - is modal open
-  objectId, - string - empty on new document
-  saveOnBlur, - boolean
-  fields, - array
-  fieldsOptions - fetchExtraData is pass to document as fieldsOptions - pass only for fields that contain a targetName, the key for each value in fieldsOptions is the targetName
-  extraData - all fetchExtraData results,
-   ... all other parameters from your documentProps configuration
-}
-
-### collectionProps.viewComponent
-Your view component will get this props {
-  fetchProps - see react-parse FetchCollecton fetchProps {data, error, status, info. isLoading, refresh, cleanData, put, post, deleteDoc, updateField}
-                * fetchProps is different if you are using cloud code
-  fields - array
-  dataHandler - function
-  extraData - all fetchExtraData results
-  title - string
-  onCreateNewDoc- function - call this and document modal will display
-  onEditDoc- function - call this with object and document modal will display to edit
-  skip - number
-  limit - number
-  // function to call when you want to set a new value
-  onLimitChanged
-  onSkipChanged
-  onOrderChanged
-  onQueryChanged
-  onPagination
-... all other parameters from your collectionProps configuration
-}
-
-
-*/

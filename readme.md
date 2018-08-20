@@ -3,17 +3,47 @@
 
 A react page container that works with [react-parse](https://www.npmjs.com/package/react-parse)  to fetch data from server and display as table/gallery or customs component.
 
-![demo](https://github.com/doronnahum/react-common-admin/blob/master/Aug-14-2018%2009-21-58.gif)
+
+![enter image description here](https://lh3.googleusercontent.com/SIsABVRWjGloAHiU2wrcRJGA2aGyeaE4k5V_y3hFeUwYdCyKReNNFmlzZtE6k7hKvic8tGkaV4Vyqg "screenRecord")
+## Table of content
+
+- [Installation](#installation)
+- [Basic Usage](#basic-usage) 
+- [Props](#props) 
+	- [Document Props](#documentprops)
+	- [Collection Props](#collectionprops)
+- **ViewComponent - the view componets will get this props**
+	-  [Document - viewComponent props](#document-viewcomponent-props)
+	-  [Collention -viewComponent props](#collention-viewcomponent-props)
+- [Document witout list](#document-witout-list)
+- [DraggableTable example](#draggabletable-example)
+- [CustomTitle](#customtitle)
+- [Fields](#fields)
+	- [TextInput](#textonput)
+	- [TextArea](#textarea)
+	- [MobileInput](#mobileinput)
+	- [UploadFile](#uploadfile)
+	- [SelectFromMedia](#selectfrommedia)
+	- [NumberInput](#numberinput)
+	- [DateTime](#datetime)
+	- [Pointer](#pointer)
+	- [ArrayOfPointer](#arrayofpointer)
+	- [ArrayOfPointerTableView ](#arrayofpointertableview )
+	- [DropDown ](#dropdown )
+	- [ObjectsDropDown](#objectsdropdown)
+	- [AddressAutoComplete  ](#addressautocomplete  )
+	- [AddressWithMapView ](#addresswithmapView )
+	- [Tags](#tags)
 
 ## Installation
-1- You need to install:
+1. First you need to install:
 [Ant Design](https://ant.design/) 
 
-2- Install react-common-admin
+2. Install react-common-admin
 ```bash
 npm i react-common-admin --save
 ```
-3- Init react-common-admin
+3. Init react-common-admin
 
 ```bash
 import { initCommonAdmin } from  'react-common-admin';
@@ -67,7 +97,7 @@ return  title;
 /*
 	langDir- You can set 'rtl' or 'ltr'
 */
-const langDir = 'rtl'
+const langDir = 'ltr'
 
 const  setParams  =  function (key, value) {
 	const href  =  `${Router.pathname}?${key}=${value}`
@@ -84,6 +114,10 @@ const  getParams  =  function () {
 initCommonAdmin({ notification, defaultDocumentMessages, langDir, customTitle, setParams, getParams })
 ```
 ## Basic Usage
+
+> You can use any inputs you want, not only from library fields
+
+
 ```jsx
 import  React  from  'react';
 import {CommonAdmin, fields} from  'react-common-admin'
@@ -259,6 +293,9 @@ renderAddBtn: this.renderSelectTypeToAdd,
 see full details in [react-parse docs](https://github.com/doronnahum/react-parse#fetchprops)
 {data, error, status, info. isLoading, refresh, cleanData, put, post, deleteDoc, updateField}
 
+----
+---
+## document witout list
 ### Need only a documet witout list?
 See this example
 ```jsx
@@ -334,4 +371,239 @@ import { CommonAdmin, customTitle } from  'react-common-admin'
 		include: 'imageFromMedia'
 ...
 }}
+```
+
+## fields
+react-common-admin fields
+```jsx
+import {fields} from 'react-common-admin'
+```
+available fields
+```jsx
+const {
+	TextInput, NumberInput, MobileInput,
+	UploadFile, DateTime, Pointer, DropDown,
+	ObjectsDropDown, AddressAutoComplete,
+	GeoLocationMapView, AddressWithMapView,
+	Tags, ArrayOfPointer, ArrayOfPointerTableView, TextArea
+} =  fields;
+```
+## Fields Examples
+
+### TextInput
+```jsx
+{
+	key:  'firstName',
+	label:  'First Name',
+	validators: { presence:  true, length: { minimum:  2 } },
+	component:  fields.TextInput,
+	helpText:  'Please tell as what is your name'
+},
+```
+### TextArea
+```jsx
+{
+	key:  'info',
+	label:  'Whe are you',
+	component:  fields.TextArea,
+	helpText:  'I am example of a textArea'
+},
+```
+### MobileInput
+We use 'libphonenumber-js to validate the phone number
+import { isValidNumber } from  'libphonenumber-js'
+```jsx
+{
+	key:  'mobile',
+	label:  'Mobile',
+	customValidation:  function (field, value) {
+		let  errors  = []
+		if(!value  ||  value  ===  '') {
+		errors.push('can\'t be blank')
+		} else  if(!isValidNumber(value)) {
+		errors.push('Please enter a valid phone number')
+		}
+		return  errors
+	},
+	component:  fields.MobileInput,
+},
+```
+### UploadFile
+
+ 1. Upload file to parse File Field
+
+
+```jsx
+{
+	key:  'image',
+	label:  'Image as Parse File Example',
+	component:  fields.UploadFile,
+	validators: { presence:  true }
+},
+```
+
+ 2. Upload file and save as url sring
+
+
+```jsx
+{
+	key:  'urlString', // Example how to upload an image an set a url string and not parse file object;
+	label:  'Image - image as string example',
+	component:  fields.UploadFile,
+	validators: { presence:  true },
+	fileValueHandler: (res) => {
+		return  res.data.url
+	}
+},
+```
+### SelectFromMedia
+
+ 1. Select file from media screen and save as pointer to media collection
+
+```jsx
+{
+key:  'imageFromMedia',
+label:  'imageFromMedia - image as pointer to Media',
+component:  fields.SelectFromMedia,
+asPointer:  true,
+validators: { presence:  true }
+},
+```
+
+ 2. Select file from media screen and save as string url
+
+```jsx
+{
+key:  'imageFromMediaAsString',
+label:  'imageFromMediaAsString - image as string from Media',
+component:  fields.SelectFromMedia,
+validators: { presence:  true }
+},
+```
+
+### NumberInput
+```jsx
+{
+	key:  'age',
+	label:  'Age - number input example',
+	component:  fields.NumberInput,
+},
+```
+### DateTime
+```jsx
+{
+	key:  'birthday',
+	label:  'Birthday',
+	component:  fields.DateTime,
+},
+```
+### Pointer
+```jsx
+{
+	key:  'city',
+	label:  'City - pointer fields example',
+	component:  fields.Pointer,
+	schemaName:  'City',
+	targetName:  'CityDropDown',
+	labelKey:  'name'
+},
+```
+### ArrayOfPointer
+drop down with multi select
+```jsx
+{
+	key:  'roles',
+	label:  'Roles',
+	component:  fields.ArrayOfPointer,
+	schemaName:  'City',
+	targetName:  'CityDropDown',
+	labelKey:  'name'
+}
+```
+### ArrayOfPointerTableView 
+Table with switch button in each row
+```jsx
+{
+	key:  'cities',
+	label:  'Cities',
+	component:  fields.ArrayOfPointerTableView,
+	schemaName:  'City',
+	targetName:  'CityDropDown',
+	labelKey:  'name'
+},
+```
+### DropDown
+select string from array of static options
+```jsx
+{
+	key:  'favoriteColor',
+	label:  'Favorite Color - dropDown static options example - string value',
+	component:  fields.DropDown,
+	options: [
+		{key: 'red', label: 'red'},
+		{key: 'green', label: 'green'},
+		{key: 'blue', label: 'blue'},
+		{key: 'pink', label: 'pink', customRender: ({label}) =>  <p style={{color: 'pink'}}>{label}</p>},
+	]
+}
+```
+### ObjectsDropDown
+select object from array of static options
+```jsx
+{
+	key:  'favoritePhone',
+	label:  'Favorite Phone - dropDown static options example - object value',
+	component:  fields.ObjectsDropDown,
+	valueKey:  'model', // default is key
+	labelKey:  'fullName', // default is label
+	options: [
+		{company:  'Samsung', OS:  'Android 8', model:  'Galaxy S9 Plus', fullName:  'Samsung Galaxy S9 Plus'},
+		{company:  'Samsung', OS:  'Android 8', model:  'Galaxy S9', fullName:  'Samsung Galaxy S9'},
+		{company:  'Huawei', OS:  'Android 8.1', model:  'P20 Pro', fullName:  'Huawei P20 Pro'},
+	]
+},
+```
+### AddressAutoComplete
+input with autocomplete off location
+```jsx
+{
+	key:  'address',
+	label:  'Address',
+	component:  AddressAutoComplete,
+	accessToken:  envConfig.MAP_BOX_ACCESS_TOKEN
+},
+```
+### AddressWithMapView
+address string and geoLocation at the same document
+```jsx
+{
+	key:  'group-address',
+	addressFieldKey:  'address',
+	locationFieldKey:  'location',
+	component:  AddressWithMapView,
+	group: [
+		{
+		key:  'address',
+		label:  'Address',
+		component:  AddressAutoComplete,
+		accessToken:  envConfig.MAP_BOX_ACCESS_TOKEN
+		},
+		{
+		key:  'location',
+		label:  'Location',
+		component:  GeoLocationMapView,
+		accessToken:  envConfig.MAP_BOX_ACCESS_TOKEN
+		},
+	],
+},
+```
+### Tags
+```jsx
+{
+	key:  'tags',
+	label:  'Tags',
+	component:  Tags, // Good for array of string
+	validators: { presence:  true, length: { minimum:  2 } },
+	helpText:  'Set tags to help the search engine what you want in the future'
+},
 ```

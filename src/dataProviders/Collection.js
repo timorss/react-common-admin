@@ -89,7 +89,7 @@ class Collection extends React.Component {
 
 
   render() {
-    const { targetName, schemaName, query, leaveClean, viewComponent, onClose, extraData, onCreateNewDoc, onEditDoc, fields, keys, include, functionName, dataHandler, tableProps, ...resProps } = this.props
+    const { targetName, onRefresh, schemaName, query, leaveClean, viewComponent, onClose, extraData, onCreateNewDoc, onEditDoc, fields, keys, include, functionName, dataHandler, tableProps, ...resProps } = this.props
     const props = {
       ...resProps,
       key: targetName,
@@ -116,6 +116,7 @@ class Collection extends React.Component {
       onPagination: this.onPagination,
       extraData: extraData,
       component: viewComponent,
+      onRefresh: onRefresh,
       ...tableProps
     }
     if(functionName) {
@@ -142,7 +143,7 @@ export default Collection
 Collection.propTypes = {
   onCreateNewDoc: PropTypes.func,
   onEditDoc: PropTypes.func,
-  viewComponent: PropTypes.element, // if Empty we use Table
+  viewComponent: PropTypes.any, // if Empty we use Table
   fields: PropTypes.array, // [{ label: 'User name', key: 'username', search: true }...]
   enabledMultiSelect: PropTypes.bool,
   query: PropTypes.object,

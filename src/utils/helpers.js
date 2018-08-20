@@ -73,6 +73,7 @@ export const getFieldValidatorMessage = function (field, value) {
   return message && message[0]
 }
 export const selectOptionsFromExtraData = function (field, extraData = {}) {
+  debugger
   if(field.type === 'pointer') {
     return extraData[field.pointerTo]
   }

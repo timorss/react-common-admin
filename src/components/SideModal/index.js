@@ -1,74 +1,78 @@
 import React from 'react';
-import { Layout, Menu, Icon } from 'antd';
+import { Layout, Popconfirm, Icon } from 'antd';
 import {langDir} from '../../configuration';
-const { Header, Sider, Content } = Layout;
+const { Sider } = Layout;
 
-const SMALL_WIDTH = 600;
-const FULL_WIDTH = 800;
-
-
-const openStyle = {
-  backgroundColor: 'white',
-  flexGrow: 0,
-  flexShrink: 0,
-  flexBasis: SMALL_WIDTH,
-  maxWidth: SMALL_WIDTH,
-  minWidth: SMALL_WIDTH,
-  width: SMALL_WIDTH
-}
-const openFullStyle = {
-  backgroundColor: 'white',
-  flexGrow: 0,
-  flexShrink: 0,
-  flexBasis: FULL_WIDTH,
-  maxWidth: FULL_WIDTH,
-  minWidth: FULL_WIDTH,
-  width: FULL_WIDTH
-}
-const closeStyle = {
-  backgroundColor: 'white',
-  flexGrow: 0,
-  flexShrink: 0,
-  flexBasis: FULL_WIDTH,
-  maxWidth: FULL_WIDTH,
-  minWidth: FULL_WIDTH,
-  width: FULL_WIDTH
-}
 class SiderDemo extends React.Component {
-  constructor(props){
-    super(props);
-    this.state = {
-      fullScreen: true
-    }
+  constructor(props) {
+    super(props)
+    this.toggleFullScreen = this.toggleFullScreen.bind(this);
+    this.toggleMinimized = this.toggleMinimized.bind(this);
   }
 
+  toggleMinimized() {
+    this.props.toggleMinimized(this.props.modalId)
+  }
+  toggleFullScreen() {
+    this.props.toggleFullScreen(this.props.modalId)
+  }
   render() {
-    const {fullScreen} = this.state
-    const {isOpen, onClose} = this.props
+    const {isOpen, onClose, modalId, objectId, minimizedDocumentBeforeMe, title, isMinimized, fullScreen} = this.props
     // const openWidth = fullScreen ? FULL_WIDTH : SMALL_WIDTH
     // const width = isOpen ? openWidth : 0
     const openClassName = fullScreen ? 'rca-sideModalOpenFull' : 'rca-sideModalOpen'
-    const className = isOpen ? openClassName : 'rca-sideModalClosed'
+    const className = isMinimized ? 'rca-sideModalMinimized' : (isOpen ? openClassName : 'rca-sideModalClosed')
+    const minimizedStyle = {right: (minimizedDocumentBeforeMe * 180) + 5}
+    const minimizedTitleStyle = {fontSize: 15}
+    const isNew = !objectId
     return (
-        <Sider
-          trigger={null}
-          collapsible={true}
-          collapsed={isOpen}
-          width={0}
-          className={className}
-        >
+      <Sider
+        trigger={null}
+        collapsible={true}
+        collapsed={isOpen}
+        width={0}
+        className={className}
+        style={isMinimized ? minimizedStyle : null}
+      >
+        <div className='rca-sideModalTop'>
+          <h2 style={isMinimized ? minimizedTitleStyle : null}>
+            {title}
+          </h2>
           <div className={'rca-sideModalTopIcons'}>
+            {isNew
+              ? <Popconfirm
+                okType="danger"
+                title={'Are you sure delete this ?'}
+                onConfirm={() => onClose(modalId)}
+                okText="Yes"
+                cancelText="No"
+              >
+                <Icon
+                  className='rca-closeIcon'
+                  type={'close-circle'}
+                />
+              </Popconfirm>
+              : <Icon
+                className='rca-closeIcon'
+                type={'close-circle'}
+                onClick={() => onClose(modalId)}
+              />
+            }
             <Icon
-              type={(fullScreen) ? (langDir === 'ltr' ? "right" : 'left') : (langDir === 'ltr' ? "left" : 'right')}
-              onClick={()=> this.setState({fullScreen: !fullScreen})}
+              type={isMinimized ? 'plus-circle' : 'minus-circle'}
+              className='rca-minimizedIcon'
+              onClick={this.toggleMinimized}
             />
             <Icon
-              type={"close"}
-              onClick={onClose}
+              style={{color: isMinimized ? 'grey' : '#59b10d'}}
+              className='rca-sizeIcon'
+              type={(fullScreen) ? (langDir === 'ltr' ? 'right-circle' : 'left-circle') : (langDir === 'ltr' ? 'left-circle' : 'right-circle')}
+              onClick={isMinimized ? null : this.toggleFullScreen}
             />
           </div>
-          {isOpen && this.props.children}
-        </Sider>
+        </div>
+        {isOpen && this.props.children}
+      </Sider>
     );
   }
 }

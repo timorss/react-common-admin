@@ -146,6 +146,7 @@ var Collection = function (_React$Component) {
     value: function render() {
       var _props5 = this.props,
           targetName = _props5.targetName,
+          onRefresh = _props5.onRefresh,
           schemaName = _props5.schemaName,
           query = _props5.query,
           leaveClean = _props5.leaveClean,
@@ -160,7 +161,7 @@ var Collection = function (_React$Component) {
           functionName = _props5.functionName,
           dataHandler = _props5.dataHandler,
           tableProps = _props5.tableProps,
-          resProps = _objectWithoutProperties(_props5, ['targetName', 'schemaName', 'query', 'leaveClean', 'viewComponent', 'onClose', 'extraData', 'onCreateNewDoc', 'onEditDoc', 'fields', 'keys', 'include', 'functionName', 'dataHandler', 'tableProps']);
+          resProps = _objectWithoutProperties(_props5, ['targetName', 'onRefresh', 'schemaName', 'query', 'leaveClean', 'viewComponent', 'onClose', 'extraData', 'onCreateNewDoc', 'onEditDoc', 'fields', 'keys', 'include', 'functionName', 'dataHandler', 'tableProps']);
 
       var props = _extends({}, resProps, {
         key: targetName,
@@ -186,7 +187,8 @@ var Collection = function (_React$Component) {
         onOrderChanged: this.onOrderChanged,
         onPagination: this.onPagination,
         extraData: extraData,
-        component: viewComponent
+        component: viewComponent,
+        onRefresh: onRefresh
       }, tableProps);
       if (functionName) {
         return _react2.default.createElement(_reactParse.FetchCloudCode, _extends({
@@ -210,7 +212,7 @@ exports.default = Collection;
 Collection.propTypes = process.env.NODE_ENV !== "production" ? {
   onCreateNewDoc: _propTypes2.default.func,
   onEditDoc: _propTypes2.default.func,
-  viewComponent: _propTypes2.default.element, // if Empty we use Table
+  viewComponent: _propTypes2.default.any, // if Empty we use Table
   fields: _propTypes2.default.array, // [{ label: 'User name', key: 'username', search: true }...]
   enabledMultiSelect: _propTypes2.default.bool,
   query: _propTypes2.default.object,

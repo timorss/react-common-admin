@@ -3,7 +3,7 @@ import * as formatters from './utils/formatters';
 import * as fields from 'react-cross-inputs';
 
 import Form from 'react-cross-form';
-import {initCommonAdmin} from './configuration';
+import {initCommonAdmin, customTitle} from './configuration';
 
 import {
   ContainerHeader,
@@ -12,7 +12,8 @@ import {
   DocForm,
   Table,
   Gallery,
-  StaticDoc
+  StaticDoc,
+  DraggableTable
 } from './components'
 
 export {
@@ -27,5 +28,7 @@ export {
   DocForm,
   Table,
   Gallery,
-  StaticDoc
+  StaticDoc,
+  DraggableTable,
+  customTitle
 }

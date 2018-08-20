@@ -22,41 +22,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var Header = _antd.Layout.Header,
-    Sider = _antd.Layout.Sider,
-    Content = _antd.Layout.Content;
-
-
-var SMALL_WIDTH = 600;
-var FULL_WIDTH = 800;
-
-var openStyle = {
-  backgroundColor: 'white',
-  flexGrow: 0,
-  flexShrink: 0,
-  flexBasis: SMALL_WIDTH,
-  maxWidth: SMALL_WIDTH,
-  minWidth: SMALL_WIDTH,
-  width: SMALL_WIDTH
-};
-var openFullStyle = {
-  backgroundColor: 'white',
-  flexGrow: 0,
-  flexShrink: 0,
-  flexBasis: FULL_WIDTH,
-  maxWidth: FULL_WIDTH,
-  minWidth: FULL_WIDTH,
-  width: FULL_WIDTH
-};
-var closeStyle = {
-  backgroundColor: 'white',
-  flexGrow: 0,
-  flexShrink: 0,
-  flexBasis: FULL_WIDTH,
-  maxWidth: FULL_WIDTH,
-  minWidth: FULL_WIDTH,
-  width: FULL_WIDTH
-};
+var Sider = _antd.Layout.Sider;
 
 var SiderDemo = function (_React$Component) {
   _inherits(SiderDemo, _React$Component);
@@ -66,26 +32,41 @@ var SiderDemo = function (_React$Component) {
 
     var _this = _possibleConstructorReturn(this, (SiderDemo.__proto__ || Object.getPrototypeOf(SiderDemo)).call(this, props));
 
-    _this.state = {
-      fullScreen: true
-    };
+    _this.toggleFullScreen = _this.toggleFullScreen.bind(_this);
+    _this.toggleMinimized = _this.toggleMinimized.bind(_this);
     return _this;
   }
 
   _createClass(SiderDemo, [{
+    key: 'toggleMinimized',
+    value: function toggleMinimized() {
+      this.props.toggleMinimized(this.props.modalId);
+    }
+  }, {
+    key: 'toggleFullScreen',
+    value: function toggleFullScreen() {
+      this.props.toggleFullScreen(this.props.modalId);
+    }
+  }, {
     key: 'render',
     value: function render() {
-      var _this2 = this;
-
-      var fullScreen = this.state.fullScreen;
       var _props = this.props,
           isOpen = _props.isOpen,
-          onClose = _props.onClose;
+          onClose = _props.onClose,
+          modalId = _props.modalId,
+          objectId = _props.objectId,
+          minimizedDocumentBeforeMe = _props.minimizedDocumentBeforeMe,
+          title = _props.title,
+          isMinimized = _props.isMinimized,
+          fullScreen = _props.fullScreen;
       // const openWidth = fullScreen ? FULL_WIDTH : SMALL_WIDTH
       // const width = isOpen ? openWidth : 0
 
       var openClassName = fullScreen ? 'rca-sideModalOpenFull' : 'rca-sideModalOpen';
-      var className = isOpen ? openClassName : 'rca-sideModalClosed';
+      var className = isMinimized ? 'rca-sideModalMinimized' : isOpen ? openClassName : 'rca-sideModalClosed';
+      var minimizedStyle = { right: minimizedDocumentBeforeMe * 180 + 5 };
+      var minimizedTitleStyle = { fontSize: 15 };
+      var isNew = !objectId;
       return _react2.default.createElement(
         Sider,
         {
@@ -93,21 +74,54 @@ var SiderDemo = function (_React$Component) {
           collapsible: true,
           collapsed: isOpen,
           width: 0,
-          className: className
+          className: className,
+          style: isMinimized ? minimizedStyle : null
         },
         _react2.default.createElement(
           'div',
-          { className: 'rca-sideModalTopIcons' },
-          _react2.default.createElement(_antd.Icon, {
-            type: fullScreen ? _configuration.langDir === 'ltr' ? "right" : 'left' : _configuration.langDir === 'ltr' ? "left" : 'right',
-            onClick: function onClick() {
-              return _this2.setState({ fullScreen: !fullScreen });
-            }
-          }),
-          _react2.default.createElement(_antd.Icon, {
-            type: "close",
-            onClick: onClose
-          })
+          { className: 'rca-sideModalTop' },
+          _react2.default.createElement(
+            'h2',
+            { style: isMinimized ? minimizedTitleStyle : null },
+            title
+          ),
+          _react2.default.createElement(
+            'div',
+            { className: 'rca-sideModalTopIcons' },
+            isNew ? _react2.default.createElement(
+              _antd.Popconfirm,
+              {
+                okType: 'danger',
+                title: 'Are you sure delete this ?',
+                onConfirm: function onConfirm() {
+                  return onClose(modalId);
+                },
+                okText: 'Yes',
+                cancelText: 'No'
+              },
+              _react2.default.createElement(_antd.Icon, {
+                className: 'rca-closeIcon',
+                type: 'close-circle'
+              })
+            ) : _react2.default.createElement(_antd.Icon, {
+              className: 'rca-closeIcon',
+              type: 'close-circle',
+              onClick: function onClick() {
+                return onClose(modalId);
+              }
+            }),
+            _react2.default.createElement(_antd.Icon, {
+              type: isMinimized ? 'plus-circle' : 'minus-circle',
+              className: 'rca-minimizedIcon',
+              onClick: this.toggleMinimized
+            }),
+            _react2.default.createElement(_antd.Icon, {
+              style: { color: isMinimized ? 'grey' : '#59b10d' },
+              className: 'rca-sizeIcon',
+              type: fullScreen ? _configuration.langDir === 'ltr' ? 'right-circle' : 'left-circle' : _configuration.langDir === 'ltr' ? 'left-circle' : 'right-circle',
+              onClick: isMinimized ? null : this.toggleFullScreen
+            })
+          )
         ),
         isOpen && this.props.children
       );

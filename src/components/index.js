@@ -6,6 +6,7 @@ import DocForm from './DocForm'
 import Table from './Table'
 import Gallery from './Gallery'
 import StaticDoc from './StaticDoc'
+import DraggableTable from './DraggableTable'
 export { default as Layout } from 'antd/lib/layout';
 
 export {
@@ -15,5 +16,6 @@ export {
   DocForm,
   Table,
   Gallery,
-  StaticDoc
+  StaticDoc,
+  DraggableTable
 }

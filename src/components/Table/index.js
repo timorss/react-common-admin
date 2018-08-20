@@ -3,8 +3,9 @@ import { Button, Popconfirm, Table as TableWrapper } from 'antd';
 import ListWrapper from '../ListWrapper'
 const ButtonGroup = Button.Group;
 const rowKey = 'objectId';
+const cursorMove = {cursor: 'move'};
 
-export default class SortView extends Component {
+class TableView extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -15,7 +16,6 @@ export default class SortView extends Component {
       this
     );
     this.onSelectRow = this.onSelectRow.bind(this);
-    this.toggleRow = this.toggleRow.bind(this);
     this.renderRowButtons = this.renderRowButtons.bind(this);
     this.isRowSelected = this.isRowSelected.bind(this);
   }
@@ -25,12 +25,19 @@ export default class SortView extends Component {
   }
 
   renderRowButtons(row = {}) {
-    const hasDelete = this.props.fetchProps && this.props.fetchProps.deleteDoc // react-parse cloudcode missing deleteDoc
+    const hasDelete = !this.props.disabledDelete && this.props.fetchProps && this.props.fetchProps.deleteDoc // react-parse cloudcode missing deleteDoc
     return (
       <ButtonGroup style={{display: 'flex'}}>
+        {this.props.draggableTable && <Button icon="bars" style={cursorMove} />}
         <Button
           icon="edit"
-          onClick={() => this.props.onEditDoc(row.objectId)}
+          onClick={() => {
+            if(this.props.customOnEdit) {
+              this.props.customOnEdit(row.objectId, this.props)
+            }else{
+              this.props.onEditDoc(row.objectId, this.props)
+            }
+          }}
         />
         {hasDelete && <Popconfirm
           okType="danger"
@@ -68,23 +75,13 @@ export default class SortView extends Component {
     return columns;
   }
 
-  onSelectRow(selectedRows, toggleRow) {
+  onSelectRow(selectedRows) {
     this.setState({ selectedRows });
-  }
-
-  toggleRow(row) {
-    if(this.isRowSelected(row)) {
-      const selectedRows = this.state.selectedRows.filter(item => item !== row.objectId)
-      this.setState({selectedRows})
-    } else{
-      this.state.selectedRows.push(row.objectId)
-      this.setState({selectedRows: this.state.selectedRows})
-    }
   }
 
   render() {
     const props = this.props;
-    const { fetchProps } = props;
+    const { showPagination, showHeader, fetchProps, draggableTable, draggableTableData, onRow, components, onViewRef, onRefresh } = props;
     const { data } = fetchProps;
     const isLoading = props.isLoading || fetchProps.isLoading
     const { selectedRows } = this.state;
@@ -95,18 +92,34 @@ export default class SortView extends Component {
     // const numberOfRows = info ? info.count : 0;
     const isOneRowSelected = selectedRows && selectedRows.length === 1
     return (
-      <ListWrapper {...this.props} isOneRowSelected={isOneRowSelected}>
+      <ListWrapper
+        {...this.props}
+        isOneRowSelected={isOneRowSelected}
+        selectedRows={selectedRows}
+        showPagination={showPagination}
+        showHeader={showHeader}
+        ref={onViewRef}
+        onRefresh={onRefresh}
+      >
         <TableWrapper
           rowKey={rowKey}
           columns={this.convertPageFieldsToAntTableColumn()}
           onChange={this.onChange}
-          dataSource={data || []}
+          dataSource={draggableTable ? draggableTableData : data || []}
           className="rca-table"
           loading={false}
           rowSelection={rowSelection}
           pagination={false}
+          onRow={onRow}
+          components={components}
         />
       </ListWrapper>
     );
   }
 }
+
+TableView.defaultProps = {
+  showPagination: true,
+  showHeader: true
+}
+export default TableView;
