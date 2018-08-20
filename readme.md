@@ -19,7 +19,7 @@ A react page container that works with [react-parse](https://www.npmjs.com/packa
 - [DraggableTable example](#draggabletable-example)
 - [CustomTitle](#customtitle)
 - [Fields](#fields)
-	- [TextInput](#textonput)
+	- [TextInput](#textinput)
 	- [TextArea](#textarea)
 	- [MobileInput](#mobileinput)
 	- [UploadFile](#uploadfile)
