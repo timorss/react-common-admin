@@ -28,7 +28,7 @@ A react page container that works with [react-parse](https://www.npmjs.com/packa
 - [Document witout list](#document-witout-list)
 - [DraggableTable example](#draggabletable-example)
 - [CustomTitle](#customtitle)
-- [Fields](#fields)
+- [Document fields](#document-fields)
 	- [TextInput](#textonput)
 	- [TextArea](#textarea)
 	- [MobileInput](#mobileinput)
@@ -44,6 +44,14 @@ A react page container that works with [react-parse](https://www.npmjs.com/packa
 	- [AddressAutoComplete  ](#addressautocomplete  )
 	- [AddressWithMapView ](#addresswithmapView )
 	- [Tags](#tags)
+- [Collection fields](#collection-fields)
+	- [Formatter](#formatter) 
+	- [Fields](#table-fields-exmpels)
+		- [string](#string)
+		- [Pointer](#pointer-with-include)
+		- [Array](#array)
+		- [Array of Pointers](#array-of-pointer)
+		- [Action Button](#action-button)
 
 ## Installation
  1. First you need to install:
@@ -263,7 +271,7 @@ extraData | object| all fetchExtraData results
 ...||Any other parameters you set inside documentProps will pass to your viewComponent
 
 ### document - wrapper
-The default wrapper is a side modal bot you can use hower modal like that
+The default wrapper is a side modal bot you can use our modal like that
 ```jsx
 import {Modal} from 'react-coomon-admin
 ...
@@ -318,10 +326,10 @@ order|string|react-parse string, default is 'createdAt'
 query|object|react-parse query, default is {}
 dataHandler |funciton| react-parse dataHandler 
 onLimitChanged|funciton|if you didn't pass this handlers than your limit is used as initial value and react-common-admin will handle the changes
-onSkipChanged|funciton| optional - only if you want to override power function and take the control of this value
-onOrderChanged|funciton|optional - only if you want to override power function and take the control of this value
-onPagination|funciton|optional - only if you want to override power function and take the control of this value
-onQueryChanged|funciton|optional - only if you want to override power function and take the control of this value
+onSkipChanged|funciton| optional - only if you want to override our function and take the control of this value
+onOrderChanged|funciton|optional - only if you want to override our function and take the control of this value
+onPagination|funciton|optional - only if you want to override our function and take the control of this value
+onQueryChanged|funciton|optional - only if you want to override our function and take the control of this value
 tableProps|object| any props you want to pass to the viewComponent
 ...||Any other parameters you set inside collectionProps will pass to your viewComponent
 viewComponent|element|See collention viewComponent propsviewComponent
@@ -469,7 +477,7 @@ import { CommonAdmin, customTitle } from  'react-common-admin'
 }}
 ```
 
-## fields
+## Document fields
 react-common-admin fields
 ```jsx
 import {fields} from 'react-common-admin'
@@ -702,4 +710,109 @@ address string and geoLocation at the same document
 	validators: { presence:  true, length: { minimum:  2 } },
 	helpText:  'Set tags to help the search engine what you want in the future'
 },
+```
+## Collection Fields
+Each field need to include a key and title
+
+ - key -  The key to data inside the data response from the server 
+ - title - The title to display in the table header
+ - search - Set true if you want to include this field when user type inside the search input
+ - formatter - Pass function if you want to manipulate the value to display (like in Date value)
+
+### formatter 
+Your function will get (cell, row, field, extraData)
+
+ - cell - The value of this field in the data base
+ - row - The all document data {objectId...}
+ - field - Your field coniguration {key : '..', titiel: '...', formatter... }
+ - extraData - All extraData , this very helpful with pointer fields
+
+### formatter examples
+```jsx
+export  const  imgForamtter  =  function (cell, row, field, extraData) {
+	if (cell  &&  cell.url) {
+		return  <img  src={cell.url}  style={{width:  50, height:  50}}/>
+	}
+	return <p>No image</p>
+}
+```
+
+> Before you create a formatter, check this list, maybe have something redey for you
+
+### Table Fields exmpels
+```jsx
+import {formatters} from  'local_react-common-admin'
+```
+### string
+  ```jsx
+  {
+    key: 'objectId',
+    title: 'Object Id',
+    search: true
+  },
+  ```
+  
+  ### img
+  ```jsx
+  
+{
+	key:  'image',
+	title:  'Image',
+	formatter:  formatters.imageFormatter
+},
+  ```
+  
+### Pointer with include
+  ```jsx
+{
+	key:  'partner',
+	title:  'Account',
+	formatter: (cell, row) => {
+		if(typeof  cell  ===  'object') {
+			const {objectId, name} =  cell
+			return <p>{name  ||  objectId}</p>;
+		}else{
+			return <p></p>
+		}
+	},
+},
+  ```
+  
+  ### Array
+  ```jsx
+  {
+	key:  'roles',
+	title:  'Roles',
+	formatter: formatters.arrayFormatter
+}
+  
+  ```
+### Array of Pointers
+When to use?
+when the response from server is like that: ['A12365','Ddck344']
+and you want to display somting like that:  Red,Green
+```
+{
+	key:  'verticals',
+	title:  'Verticals',
+	pointerTo:  'VerticalDropDown',
+	displayKey:  'name',
+	formatter:  formatters.arrayOfPointerDisplay,
+	
+},
+/*
+In this example, our additional data include this:
+<CommonAdmin
+	fetchExtraData={[
+		{schemaName:  'Vertical', targetName:  'VerticalDropDown'},
+	}]
+*/
+```
+### Action Button
+If you want to show in the table action button, at this to collection fields
+```jsx
+{
+	key:  'actionBtn',
+	actionBtn:  true
+}
 ```
