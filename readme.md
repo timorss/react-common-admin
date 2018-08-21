@@ -8,18 +8,28 @@ A react page container that works with [react-parse](https://www.npmjs.com/packa
 ## Table of content
 
 - [Installation](#installation)
+- [initCommonAdmin](#init-react-common-admin)
+	- [notification](#notification) 
+	- [defaultDocumentMessages](#defaultdocumentmessages) 
+	- [langDir](#langdir) 
+	- [customTitle](#customtitle) 
+	- [setParams](#setparams) 
+	- [getParams](#getparams) 
 - [Basic Usage](#basic-usage) 
 - [Props](#props) 
 	- [Document Props](#documentprops)
+		- [View Component](#document-viewcomponent)
+		- [Wrapper Component](#document---wrapper)
 	- [Collection Props](#collectionprops)
-- **ViewComponent - the view componets will get this props**
-	-  [Document - viewComponent props](#document-viewcomponent-props)
-	-  [Collention -viewComponent props](#collention-viewcomponent-props)
+		 - [View Component](#collention-viewcomponent)
+			- collection view Component ready to use
+				- [Table - is the default](#table)
+				- [DraggableTable](#draggabletable)
 - [Document witout list](#document-witout-list)
 - [DraggableTable example](#draggabletable-example)
 - [CustomTitle](#customtitle)
 - [Fields](#fields)
-	- [TextInput](#textinput)
+	- [TextInput](#textonput)
 	- [TextArea](#textarea)
 	- [MobileInput](#mobileinput)
 	- [UploadFile](#uploadfile)
@@ -36,24 +46,43 @@ A react page container that works with [react-parse](https://www.npmjs.com/packa
 	- [Tags](#tags)
 
 ## Installation
-1. First you need to install:
+ 1. First you need to install:
 [Ant Design](https://ant.design/) 
 
-2. Install react-common-admin
-```bash
-npm i react-common-admin --save
-```
-3. Init react-common-admin
+ 2. Install react-common-admin
+	```bash
+	npm i react-common-admin --save
+	```
 
-```bash
-import { initCommonAdmin } from  'react-common-admin';
+ 3. Init react-common-admin
+     
+	 ```jsx
+	 //     inside your root component
+	 import { initCommonAdmin } from  'react-common-admin';
+	 
+	initCommonAdmin({
+		notification,
+		defaultDocumentMessages,
+		langDir,
+		customTitle,
+		setParams,
+		getParams
+	})
+	```
 
-/* 
+
+
+
+## Init react-common-admin
+initCommonAdmin exmples for of the options
+### notification 
+```jsx
+/*
 	notification service -
 	You can pass a notification service and
-	react-common-admi will trigger a notification
+	react-common-admin will trigger a notification
 	in each put/post/delete action
-*/  
+*/
 const  notification  = {
 	success: (message) => console.log('success', message),
 	error: (message) => console.log('error', message),
@@ -61,10 +90,13 @@ const  notification  = {
 	warning: (message) => console.log('warning', message),
 	warn: (message) =>  console.log('warn', message),
 }
-/* 
+```
+### defaultDocumentMessages
+```jsx
+/*
 	notification default messages -
 	You can pass a default notification messages
-*/  
+*/
 const  defaultDocumentMessages  = {
 	onPostMessage: 'Created successfully',
 	onPostFailedMessage: 'document - Created failed',
@@ -73,11 +105,18 @@ const  defaultDocumentMessages  = {
 	onDeleteMessage: ' Deleted successfully',
 	onDeleteFailedMessage: ' Deleted failed'
 }
+```
+### langDir
+```jsx
+const langDir = 'ltr' // You can set 'rtl' or 'ltr'
+```
+### customTitle
+```jsx
 /*
 	document customTitle-
 	You can pass a function that get a
 	props and return the title to diaplay
-	in the document heade
+	in the document header
 */
 const  customTitle  =  function ({ state, props }) {
 	const { data } =  state;
@@ -93,26 +132,29 @@ const  customTitle  =  function ({ state, props }) {
 }
 return  title;
 }
-
+```
+### setParams
+```jsx
 /*
-	langDir- You can set 'rtl' or 'ltr'
+	If you want to persist the user work when the page is full reload,
+	we need an access to URL params, pass setParams and setParams
 */
-const langDir = 'ltr'
-
 const  setParams  =  function (key, value) {
 	const href  =  `${Router.pathname}?${key}=${value}`
 	const  as  =  href
 	Router.push(href, as, { shallow:  true })
 }
+```
+### getParams
+```jsx
+import  Router  from  'next/router'; // You can use any Router service you want
 
 const  getParams  =  function () {
 	return  Router.query
 }
-
-//------ Init with all optional configurations:
-
-initCommonAdmin({ notification, defaultDocumentMessages, langDir, customTitle, setParams, getParams })
 ```
+
+
 ## Basic Usage
 
 > You can use any inputs you want, not only from library fields
@@ -178,7 +220,6 @@ refreshExtraDataOnRefresh|boolean<br/><small>default: true<small></small></small
 |-----|--|--|
 fields|array <br/><small>required<small></small></small>| we use [react-cross-form](https://github.com/doronnahum/react-cross-form#readme)
 wrapper|element|You can replace the default side modal wrapper , wrapper get this props <br />{<br />isOpen: bollean,<br /> onClose: function,<br />title: string,<br /> children: react children<br />}|
-viewComponent|element|See document viewComponent props
 title|string|title to display
 customTitle|function| function that get {state, props} and return string as title
 parseDataBeforePost|function| optional - function that call with the data before post, (data, tableProps) => {return ({...data, {test: 1})}
@@ -189,114 +230,188 @@ onPostFinished|function|react-parse onPostFinished
 onPutFinished|function|react-parse onPutFinished
 onDeleteFinished|function|react-parse onDeleteFinished
 showDeleteButton|boolean|
-showCloseButton|boolean
-### document viewComponent props
------
+showCloseButton|boolean|
+viewComponent|element| default is DocForm but you can pass your custom component, See document viewComponent props for more information
+
+
+
+## document viewComponent
+
+**How to pass your component ?**
 ```jsx
-{
-	fetchProps - see react-parse fetchProps;
-	onClose, - function - call to close modal
-	isOpen - boolean - is modal open
-	objectId, - string - empty on new document
-	saveOnBlur, - boolean
-	fields, - array
-	fieldsOptions - fetchExtraData is pass to document as fieldsOptions - pass only for fields that contain a targetName, the key for each value in fieldsOptions is the targetName
-	extraData - all fetchExtraData results,
-	... all other parameters from your documentProps configuration
+import MyDocView from './MyDocView'
+...
+return (
+<CommonAdmin
+	...
+	documentProps={{
+		viewComponent: MyDocView 
+	}}
+	...
+```
+**What props you will get ?**
+| key | type | Description|
+|-----|--|--|
+|fetchProps |object|See [react-parse fetchProps](https://github.com/doronnahum/react-parse#fetchprops)|
+onClose|function |Call to close modal (relevant when the document wrapper is modal)
+isOpen |boolean| True when this modal is open
+objectId|string| Parse document id, empty on new document 
+saveOnBlur| boolean| The value from your CommonAdmin>documentProps configuraion
+fields|array|The value from your CommonAdmin>documentProps configuraion|
+fieldsOptions |object|FetchExtraData is pass to document as fieldsOptions - pass only for fields that contain a targetName.<br />the key for each value in fieldsOptions is the targetName
+extraData | object| all fetchExtraData results
+...||Any other parameters you set inside documentProps will pass to your viewComponent
+
+### document - wrapper
+The default wrapper is a side modal bot you can use hower modal like that
+```jsx
+import {Modal} from 'react-coomon-admin
+...
+return (
+<CommonAdmin
+	...
+	documentProps={{
+		wrapper: Modal
+	}}
+	...
+/>
+```
+And you can customize The wrapper like that
+```jsx
+import Modal from './rect-some-modal-component'
+
+class  MyDocWrapper extends  React.Component {
+	render() {
+		const {isOpen, onClose, modalId} =  this.props
+		return(
+			<Modal isOpen={isOpen} onClose={() => onClose(modalId)} >
+				{children}
+			</Modal>
+		)
+	}
+}
+
+export default class  MyScreen extends  React.Component {
+	render() {
+		return(
+			<CommonAdmin
+				...
+				documentProps={{
+					wrapper: MyDocWrapper
+				}}
+				...
+			/>
+		)
+	}
 }
 ```
+
 ## collectionProps
 
 | key | type | Description|
 |-----|--|--|
 fields|array <br/><small>required<small></small></small>| [{key: 'objectId', title: 'Object Id', search: true, formatter: (cell, row) => {}} ]
-viewComponent|element|See collention viewComponent props
 title|string|title to display
 limit|number|react-parse limit value , default is 10
 skip|number|react-parse skip value , default is 0,
 order|string|react-parse string, default is 'createdAt'
 query|object|react-parse query, default is {}
+dataHandler |funciton| react-parse dataHandler 
 onLimitChanged|funciton|if you didn't pass this handlers than your limit is used as initial value and react-common-admin will handle the changes
-onSkipChanged|funciton|
-onOrderChanged|funciton|
-onPagination|funciton|
-onQueryChanged|funciton|
+onSkipChanged|funciton| optional - only if you want to override power function and take the control of this value
+onOrderChanged|funciton|optional - only if you want to override power function and take the control of this value
+onPagination|funciton|optional - only if you want to override power function and take the control of this value
+onQueryChanged|funciton|optional - only if you want to override power function and take the control of this value
 tableProps|object| any props you want to pass to the viewComponent
-### collention viewComponent props
-------
+...||Any other parameters you set inside collectionProps will pass to your viewComponent
+viewComponent|element|See collention viewComponent propsviewComponent
+## collention viewComponent
+**How to pass your component ?**
 ```jsx
-{
-	fetchProps - see react-parse fetchProps 
-	fields - array
-	dataHandler - see react-parse dataHandler (clodeCode)
-	extraData - all fetchExtraData results
-	title - string
-	onCreateNewDoc- function - call this and document modal will display, you can pass as first parameter any data you want and document will get this on props.dataFromCollection
-	onEditDoc- function - call this with objectId and document modal will display to edit, you can pass as seconde parameter any data you want and document will get this on props.dataFromCollectio
-	skip - number
-	limit - number
-	// function to call when you want to set a new value
-	onLimitChanged: (limit: number) => {...}
-	onSkipChanged: (skip: number) => {...}
-	onOrderChanged: (order: string => {...}
-	onQueryChanged: (query: object) => {...}
-	onPagination: (page: number, pageSize: number) => {...}
-	... all other parameters from your collectionProps configuration
-}
+import MyTablView from './MyDocView'
+...
+return (
+<CommonAdmin
+	...
+	collectionProps={{
+		viewComponent: MyTablView 
+	}}
+	...
 ```
-
-### collention - tableProps options
+**What props you will get ?**
+| key | type | Description|
+|-----|--|--|
+extraData | object| All fetchExtraData results
+|fetchProps |object|See [react-parse fetchProps](https://github.com/doronnahum/react-parse#fetchprops)
+fields	|array	|The value from your CommonAdmin>collentionProps configuraion
+onCreateNewDoc|function |Call this and document modal will display, you can pass as first parameter any data you want and document will get this on props.dataFromCollection
+onEditDoc|function | Call this with objectId and document modal will display to edit, you can pass as seconde parameter any data you want and document will get this on props.dataFromCollectio
+skip| number| Current skip value
+limit |number| Current limit value
+|onLimitChanged|function | Call to set new limit value<br/> onLimitChanged(20)
+|onSkipChanged|function |Call to set new skip value<br/> onSkipChanged(20)
+|onOrderChanged|function |Call to set new order value<br/> onOrderChanged('createdAt')
+|onPagination|function |Call to set new limit and skip value<br/> onPagination(page, limit)<br/>We caliculate skip from page like that:<br/> skip = (page  -  1) *  limit
+...||Any other parameters you set inside collentionProps will pass to your viewComponent
+## Table
+The default collection viewComponent is Table
+You can pass inside collentionProps tableProps  object to customize some things in the table
+```jsx
+...
+return (
+<CommonAdmin
+	...
+	collectionProps={{
+		tableProps : {
+			disabledDelete: true
+		}
+	}}
+	...
+```
+### tableProps options
 -----
 | key | type | Description|
 |-----|--|--|
 |renderAddBtn|function|funciton that get all table props and need to return a button|
 customOnEdit|function| funciton that be call when user click on edit button, with the row and all table props (rowObjectId, tableProps) => {...}
-renderAddBtn example |
+renderAddBtn |function|funciton that be call when user click on add button
 disabledDelete|boolean|Set true to hide the delete button
-
+### renderAddBtn exmple
 ```jsx
-renderSelectTypeToAdd(res) {
-const  productTypes  =  objDig(res, 'extraData.ProductType') || []
-const  onSelect  = (menuItem) => {
-res.onCreateNewDoc(menuItem.item.props.value)
-}
 return (
-	<Dropdown 
-		overlay={
-			<Menu  onClick={onSelect}>
-			{productTypes.map(item  => {
-			return  <Menu.Item  key={item.objectId}  value={item}>{item.name}</Menu.Item>
-			})}</Menu>
+<CommonAdmin
+	collectionPops: {
+		tableProps: {
+			renderAddBtn: (props) => {
+				return <button onClick={() => {
+					props.onCreateNewDoc()
+				}}>Add</button>
+			},
 		}
-		>
-		<Button  style={{ marginLeft: 8 }}>
-			Add <Icon  type="down" />
-		</Button>
-	</Dropdown>
-)
-}
 ...
-...
+/>
+```
+## DraggableTable
+By default collection render a table, if you want you can pass as viewComponent a DraggableTable, it is like the regular table with the ability to drag row and change value in the DB base user drag and drop
+```jsx
+import {CommonAdmin, DraggableTable} from  'react-common-admin';
 <CommonAdmin
 ...
-collectionPops: {
-...
-tableProps: {
-renderAddBtn: this.renderSelectTypeToAdd,
-}
+	collectionProps={{
+	...
+		viewComponent:  DraggableTable,
+		tableProps: {
+			orderKey:  'orderKey' // in this case each document in the DB contain orderKey key with value that help us render the view by a specific order
+		// optional
+		groups: ['related', 'child'], // render data in separate tables
+		groupBy: 'relationType', // key to group value
+			
+		}
 ...
 ```
 
-
-
-### react-parse fetchProps
-see full details in [react-parse docs](https://github.com/doronnahum/react-parse#fetchprops)
-{data, error, status, info. isLoading, refresh, cleanData, put, post, deleteDoc, updateField}
-
-----
----
 ## document witout list
-### Need only a documet witout list?
+### Need only a documet ?
 See this example
 ```jsx
 import React from 'react';
@@ -335,25 +450,6 @@ export default class Example extends React.Component {
   }
 }
 
-```
-
-## DraggableTable example
-By default collection render a table, if you want you can pass as viewComponent a DraggableTable, it is like the regular table with the ability to drag row and change value in the DB base user drag and drop
-```jsx
-import {CommonAdmin, DraggableTable} from  'react-common-admin';
-<CommonAdmin
-...
-	collectionProps={{
-	...
-		viewComponent:  DraggableTable,
-		tableProps: {
-			orderKey:  'orderKey' // in this case each document in the DB contain orderKey key with value that help us render the view by a specific order
-		// optional
-		groups: ['related', 'child'], // render data in separate tables
-		groupBy: 'relationType', // key to group value
-			
-		}
-...
 ```
 
 ### customTitle
