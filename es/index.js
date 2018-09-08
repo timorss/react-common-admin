@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.customTitle = exports.DraggableTable = exports.StaticDoc = exports.Gallery = exports.Table = exports.DocForm = exports.SideModal = exports.Loader = exports.ContainerHeader = exports.Form = exports.fields = exports.formatters = exports.CommonAdmin = exports.initCommonAdmin = undefined;
+exports.buildValidateJsObject = exports.util = exports.Modal = exports.customTitle = exports.DraggableTable = exports.StaticDoc = exports.Gallery = exports.Table = exports.DocForm = exports.SideModal = exports.Loader = exports.ContainerHeader = exports.Form = exports.fields = exports.formatters = exports.CommonAdmin = exports.initCommonAdmin = undefined;
 
 var _CommonAdmin = require('./CommonAdmin');
 
@@ -13,15 +13,19 @@ var _formatters = require('./utils/formatters');
 
 var formatters = _interopRequireWildcard(_formatters);
 
-var _reactCrossInputs = require('react-cross-inputs');
+var _reactCrossInputs = require('../react-cross-inputs');
 
 var fields = _interopRequireWildcard(_reactCrossInputs);
 
-var _reactCrossForm = require('react-cross-form');
+var _reactCrossForm = require('../react-cross-form');
 
 var _reactCrossForm2 = _interopRequireDefault(_reactCrossForm);
 
 var _configuration = require('./configuration');
+
+var _helpers = require('./utils/helpers');
+
+var util = _interopRequireWildcard(_helpers);
 
 var _components = require('./components');
 
@@ -43,3 +47,6 @@ exports.Gallery = _components.Gallery;
 exports.StaticDoc = _components.StaticDoc;
 exports.DraggableTable = _components.DraggableTable;
 exports.customTitle = _configuration.customTitle;
+exports.Modal = _components.Modal;
+exports.util = util;
+exports.buildValidateJsObject = _reactCrossForm.buildValidateJsObject;

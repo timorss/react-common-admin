@@ -100,7 +100,7 @@ export default class GalleryView extends Component {
                 }
                 actions={[
                   <div className='rca-g-actions' key={'actions'}>
-                    <a onClick={() => { this.props.onEditDoc(objectId); }}>
+                    <a onClick={() => { this.props.onEditDoc(objectId); }} className='rca-g-editBtn'>
                       <Icon type="edit"/>
                     </a>
                     <Popconfirm
@@ -110,7 +110,7 @@ export default class GalleryView extends Component {
                       okText="Yes"
                       cancelText="No"
                     >
-                      <Icon type="delete" />
+                      <Icon type="delete" className='rca-g-deleteBtn' />
                     </Popconfirm>
                   </div>]}
               >

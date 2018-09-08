@@ -60,15 +60,21 @@ class DocForm extends React.Component {
    * This function only manipulate a local data and didn't save it on the server yet, see react-parse updateField
    * but if info include the boolean putOnChange then we run this.onPut, this efficient for special inputs that didn't have onBlur
    */
-  onChange({key, value, info, isValid}) {
+  onChange(payload) {
+    const {fetchProps, parseDataBeforeChange, objectId} = this.props
+    let _payload = payload
+    if(parseDataBeforeChange) {
+      _payload = parseDataBeforeChange(payload, fetchProps.data)
+    }
+    const {key, value, info, isValid} = _payload
     // We need to know that fileInclude for the post with files if needed
     if(info && info.fileInclude) {
       this.toggleFileInclude(true, info.fileValueHandler)
     }
     // Make the local update
-    this.props.fetchProps.updateField(key, value)
+    fetchProps.updateField(key, value)
     // Put to Server if it is a existing document
-    if(this.props.objectId && info && info.putOnChange) {
+    if(objectId && info && info.putOnChange) {
       // Value is valid
       if(isValid) {
         this.onPut({
@@ -111,7 +117,12 @@ class DocForm extends React.Component {
    */
   onBlur(payload) {
     const {objectId, saveOnBlur} = this.props;
-    const { key, initialValue, isValid, info, value } = payload
+    const {fetchProps, parseDataBeforeChange} = this.props
+    let _payload = payload
+    if(parseDataBeforeChange) {
+      _payload = parseDataBeforeChange(payload, fetchProps.data)
+    }
+    const { key, initialValue, isValid, info, value } = _payload
     let _value = value
     // override the value if info contain a value
     if(info && (typeof info.value !== 'undefined')) {
@@ -178,8 +189,8 @@ class DocForm extends React.Component {
   }
 
   render() {
-    const { onClose, objectId, saveOnBlur, fetchProps, fields, fieldsOptions, showCloseButton, showDeleteButton } = this.props;
-    const { refresh, put, data } = fetchProps
+    const { onClose, objectId, saveOnBlur, fetchProps, fields, fieldsOptions, showCloseButton, showDeleteButton, collectionData } = this.props;
+    const { refresh, put, data, isLoading, dispatchId } = fetchProps
     const isFirstLoading = objectId && isEmpty(data)
     return (
       <div className="rca-docForm">
@@ -196,6 +207,10 @@ class DocForm extends React.Component {
             }}
             toggleFileInclude={this.toggleFileInclude}
             fieldsOptions={fieldsOptions}
+            collectionData={collectionData}
+            isLoading={isLoading}
+            dispatchId={dispatchId}
+            documentProps={this.props}
           />
         </form>
         <div style={{ height: 50, pingTop: '1.6rem' }}>

@@ -91,6 +91,7 @@ class ListWrapper extends Component {
     const { fetchProps } = props;
     const { info } = fetchProps;
     const numberOfRows = info ? info.count : 0;
+    if(numberOfRows <= this.props.limit) return null;
     return (
       <Pagination
         style={{ textAlign: 'right' }}
@@ -176,7 +177,7 @@ class ListWrapper extends Component {
     if(this.props.customOnEdit) {
       this.props.customOnEdit(rowId, this.props)
     }else{
-      this.props.onEditDoc(rowId, this.props)
+      this.props.onEditDoc(rowId)
     }
   }
 
@@ -191,7 +192,7 @@ class ListWrapper extends Component {
   render() {
     const { fetchProps, isOneRowSelected, showPagination, showHeader, subTitle } = this.props;
     const isLoading = this.props.isLoading || fetchProps.isLoading;
-    const hasSubTitle = ~isEmptyString(subTitle)
+    const hasSubTitle = isEmptyString(subTitle)
     return (
       <div className="rca-listWrapper-Screen">
         <div className="rca-listWrapper-Screen-Content">

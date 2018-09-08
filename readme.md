@@ -7,7 +7,7 @@ A react page container that works with [react-parse](https://www.npmjs.com/packa
 ![enter image description here](https://lh3.googleusercontent.com/SIsABVRWjGloAHiU2wrcRJGA2aGyeaE4k5V_y3hFeUwYdCyKReNNFmlzZtE6k7hKvic8tGkaV4Vyqg "screenRecord")
 ## Table of content
 
-- [Installation](#installation)
+ [Installation](#installation)
 - [initCommonAdmin](#init-react-common-admin)
 	- [notification](#notification) 
 	- [defaultDocumentMessages](#defaultdocumentmessages) 
@@ -29,7 +29,7 @@ A react page container that works with [react-parse](https://www.npmjs.com/packa
 - [DraggableTable example](#draggabletable-example)
 - [CustomTitle](#customtitle)
 - [Document fields](#document-fields)
-	- [TextInput](#textonput)
+	- [TextInput](#textinput)
 	- [TextArea](#textarea)
 	- [MobileInput](#mobileinput)
 	- [UploadFile](#uploadfile)
@@ -57,16 +57,17 @@ A react page container that works with [react-parse](https://www.npmjs.com/packa
  1. First you need to install:
 [Ant Design](https://ant.design/) 
 
- 2. Install react-common-admin
-	```bash
+ 2.2- Install react-common-admin
 	npm i react-common-admin --save
 	```
 
- 3. Init react-common-admin
+ 3.3- Init react-common-admin
      
 	 ```jsx
 	 //     inside your root component
-	 import { initCommonAdmin } from  'react-common-admin';
+	 
+```bash
+import { initCommonAdmin } from  'react-common-admin';
 	 
 	initCommonAdmin({
 		notification,
@@ -146,8 +147,8 @@ return  title;
 /*
 	If you want to persist the user work when the page is full reload,
 	we need an access to URL params, pass setParams and setParams
-*/
-const  setParams  =  function (key, value) {
+*/ se
+const ar =   setParams  =  function (key, value) {
 	const href  =  `${Router.pathname}?${key}=${value}`
 	const  as  =  href
 	Router.push(href, as, { shallow:  true })
@@ -166,6 +167,13 @@ const  getParams  =  function () {
 ## Basic Usage
 
 > You can use any inputs you want, not only from library fields
+
+
+const  getParams  =  function () {
+	return  Router.query
+}
+
+//--- ntional confuratnmon a efoutese, a, sote })
 
 
 ```jsx
@@ -215,18 +223,17 @@ render() {
 |targetName|string <br/><small>required<small></small></small>|react-parse targetName|
 |schemaName|string <br/><small>required<small></small></small>|react-parse schemaName|
 functionName|string| react-parse functionName <br/> <small><small>When you using clude code the delete from table is not enabled</small></small>
-onVisibleDocumentsChanged|function| Function that be call when VisibleDocuments state is changed
-fetchExtraData|array|array of objects, each object is react-parse collection configuration <br />[{schemaName: 'Member', targetName: 'MemberData'}]<br/> The data will be avilable for you in the components
+onVisibleDocumentsChanged|function| Function that be call when VisibleDocuments state is changedfetchExtraData|array|array of objects, each object is react-parse collection configuration <br />[{schemaName: 'Member', targetName'MemberData'}]<br/> The data will be avilable for you in the components
 documentProps|object <br/><small>required<small></small></small>| See documentProps
 collectionProps|object <br/><small>required<small></small></small>| See collectionProps
 openAsFullDoc|boolean<br/><small>default: true<small></small></small>|, set false if you want the document to open as a half screen
 paramSync|boolean<br/><small>default: true<small></small></small>|set false if you didnt want to sync visibleDocument with url parms
-refreshExtraDataOnRefresh|boolean<br/><small>default: true<small></small></small>|When true, react-parse will fetch data to all extra data and not only document/collection 
+refreshExtraDataOnRefresh|boolean<br/><small>default: true<small></small></small>|When true, react-parse will fetch data to all extra data and not only document/collection
 
 ## documentProps
 | key | type | Description|
 |-----|--|--|
-fields|array <br/><small>required<small></small></small>| we use [react-cross-form](https://github.com/doronnahum/react-cross-form#readme)
+fields|array <br/><small>required<small></small></small>| we use [react-cross-form](https://github.com/doronnahum/react-cross-form#readme)<br/> Options that not from react-cross-form: <br/> 1- You can add to each field an InitialValue (work only with new document)
 wrapper|element|You can replace the default side modal wrapper , wrapper get this props <br />{<br />isOpen: bollean,<br /> onClose: function,<br />title: string,<br /> children: react children<br />}|
 title|string|title to display
 customTitle|function| function that get {state, props} and return string as title
@@ -240,8 +247,8 @@ onDeleteFinished|function|react-parse onDeleteFinished
 showDeleteButton|boolean|
 showCloseButton|boolean|
 viewComponent|element| default is DocForm but you can pass your custom component, See document viewComponent props for more information
-
-
+stayOpenAfterPost|boolean|Set true if you want to leave the document open after post successfully
+initialValue|object| You can pass object and new document will create with this initialValue, see react-parse initialValue
 
 ## document viewComponent
 
@@ -260,13 +267,15 @@ return (
 **What props you will get ?**
 | key | type | Description|
 |-----|--|--|
-|fetchProps |object|See [react-parse fetchProps](https://github.com/doronnahum/react-parse#fetchprops)|
-onClose|function |Call to close modal (relevant when the document wrapper is modal)
-isOpen |boolean| True when this modal is open
-objectId|string| Parse document id, empty on new document 
+|
+	fetchProps |object|S- see [react-parse fetchProps](https://github.com/doronnahum/react-parse#fetchprops)|
+;
+	onClose|, - function |C- call to close modal (relevant when the document wrapper is modal)
+	isOpen |- boolean| True when th - is modal is open
+	objectId|, - string| Parse document id, - empty on new document 
 saveOnBlur| boolean| The value from your CommonAdmin>documentProps configuraion
-fields|array|The value from your CommonAdmin>documentProps configuraion|
-fieldsOptions |object|FetchExtraData is pass to document as fieldsOptions - pass only for fields that contain a targetName.<br />the key for each value in fieldsOptions is the targetName
+	fields|, - array|The value from your CommonAdmin>documentProps configuraion|
+	fieldsOptions |object|F- fetchExtraData is pass to document as fieldsOptions - pass only for fields that contain a targetName.<br />, the key for each value in fieldsOptions is the targetName
 extraData | object| all fetchExtraData results
 ...||Any other parameters you set inside documentProps will pass to your viewComponent
 
@@ -310,10 +319,37 @@ export default class  MyScreen extends  React.Component {
 				...
 			/>
 		)
-	}
+	},
+	... all other parameters from your documentProps configuration
 }
 ```
 
+### document - initialValue
+You have to options to set to a new document an initialValue,
+as you can see in the example, one option is inside the document fields for each field and the other option is inside the documentProps
+```jsx
+const DocFields = [
+	{
+	key: 'title',
+	label: 'Title',,
+	component: TextInput,
+	initialValue: 'The article title initialValue'
+	},
+	{
+	key: 'body',
+	label: 'Body',,
+	component: TextInput,
+	},
+]
+<CommonAdmin
+	...
+	documentProps={{
+	fields: DocFields,
+	initialValue: {
+		body: 'The article body initialValue'
+	}
+	}}
+``` 
 ## collectionProps
 
 | key | type | Description|
@@ -727,6 +763,10 @@ Your function will get (cell, row, field, extraData)
  - field - Your field coniguration {key : '..', titiel: '...', formatter... }
  - extraData - All extraData , this very helpful with pointer fields
 
+> This formatter for the collection fields
+> document formatter is different, check react-cross-form formatter for more details
+
+
 ### formatter examples
 ```jsx
 export  const  imgForamtter  =  function (cell, row, field, extraData) {
@@ -741,8 +781,9 @@ export  const  imgForamtter  =  function (cell, row, field, extraData) {
 
 ### Table Fields exmpels
 ```jsx
-import {formatters} from  'local_react-common-admin'
+import {formatters} from  'react-common-admin'
 ```
+formatter = function(fieldValue, docData, fieldConfig, extraData){ return 'your view'}
 ### string
   ```jsx
   {
@@ -814,5 +855,198 @@ If you want to show in the table action button, at this to collection fields
 {
 	key:  'actionBtn',
 	actionBtn:  true
+
+onOrderChanged|funciton|
+onPagination|funciton|
+onQueryChanged|funciton|
+tableProps|object| any props you want to pass to the viewComponent
+### collention viewComponent props
+------
+```jsx
+{
+	fetchProps - see react-parse fetchProps 
+	fields - array
+	dataHandler - see react-parse dataHandler (clodeCode)
+	extraData - all fetchExtraData results
+	title - string
+	onCreateNewDoc- function - call this and document modal will display, you can pass as first parameter any data you want and document will get this on props.dataFromCollection
+	onEditDoc- function - call this with objectId and document modal will display to edit, you can pass as seconde parameter any data you want and document will get this on props.dataFromCollectio
+	skip - number
+	limit - number
+	// function to call when you want to set a new value
+	onLimitChanged: (limit: number) => {...}
+	onSkipChanged: (skip: number) => {...}
+	onOrderChanged: (order: string => {...}
+	onQueryChanged: (query: object) => {...}
+	onPagination: (page: number, pageSize: number) => {...}
+	... all other parameters from your collectionProps configuration
 }
+```
+
+### collention - tableProps options
+-----
+| key | type | Description|
+|-----|--|--|
+|renderAddBtn|function|funciton that get all table props and need to return a button|
+customOnEdit|function| funciton that be call when user click on edit button, with the row and all table props (rowObjectId, tableProps) => {...}
+renderAddBtn example |
+disabledDelete|boolean|Set true to hide the delete button
+
+```jsx
+renderSelectTypeToAdd(res) {
+const  productTypes  =  objDig(res, 'extraData.ProductType') || []
+const  onSelect  = (menuItem) => {
+res.onCreateNewDoc(menuItem.item.props.value)
+}
+return (
+	<Dropdown 
+		overlay={
+			<Menu  onClick={onSelect}>
+			{productTypes.map(item  => {
+			return  <Menu.Item  key={item.objectId}  value={item}>{item.name}</Menu.Item>
+			})}</Menu>
+		}
+		>
+		<Button  style={{ marginLeft: 8 }}>
+			Add <Icon  type="down" />
+		</Button>
+	</Dropdown>
+)
+}
+...
+...
+<CommonAdmin
+...
+collectionPops: {
+...
+tableProps: {
+renderAddBtn: this.renderSelectTypeToAdd,
+}
+...
+```
+
+
+
+### react-parse fetchProps
+see full details in [react-parse docs](https://github.com/doronnahum/react-parse#fetchprops)
+{data, error, status, info. isLoading, refresh, cleanData, put, post, deleteDoc, updateField}
+
+### Need only a documet witout list?
+See this example
+```jsx
+import React from 'react';
+import {CommonAdmin, StaticDoc} from 'react-common-admin'
+import {DocFields} from './config';
+
+export default class Example extends React.Component {
+  render() {
+    return (
+      <div>
+        <CommonAdmin
+          schemaName='Member'
+          targetName='ProfileSettings'
+          title='Profile Settings'
+          showCollection={false} //--------------->!important
+          documentProps={{
+            fields: DocFields,
+            objectId: 'eviegCusH8',
+            wrapper: StaticDoc, //--------------->!important
+            messages: {
+              onPostMessage: 'Create successfully',
+              onPostFailedMessage: 'Create failed',
+              onPutMessage: 'Update successfully',
+              onPutFailedMessage: 'Update failed):',
+              onDeleteMessage: 'Deleted successfully',
+              onDeleteFailedMessage: 'Deleted failed'
+            },
+            customTitle: ({objectId, data}) => { 'title' }
+          }}
+          fetchExtraData={[
+            {schemaName: 'City', targetName: 'CityDropDown'},
+          ]}
+        />
+      </div>
+    );
+  }
+}
+
+```
+
+## DraggableTable example
+By default collection render a table, if you want you can pass as viewComponent a DraggableTable, it is like the regular table with the ability to drag row and change value in the DB base user drag and drop
+```jsx
+import {CommonAdmin, DraggableTable} from  'react-common-admin';
+<CommonAdmin
+...
+	collectionProps={{
+	...
+		viewComponent:  DraggableTable,
+		tableProps: {
+			orderKey:  'orderKey' // in this case each document in the DB contain orderKey key with value that help us render the view by a specific order
+		// optional
+		groups: ['related', 'child'], // render data in separate tables
+		groupBy: 'relationType', // key to group value
+			
+		}
+...
+```
+
+### customTitle
+When you init with customTitle you can use it like that:
+```
+import { CommonAdmin, customTitle } from  'react-common-admin'
+	<CommonAdmin
+		schemaName='Example'
+		targetName='ExampleScreen'
+		title='Example Screen'
+		documentProps={{
+		fields: DocFields, // Define this fields you want to render
+		customTitle: customTitle,
+		titleKey: 'firstName',
+		include: 'imageFromMedia'
+...
+}}
+```
+## special situations
+
+### Want to create a new document only if he contains a Unique key?
+In this example, we want to enable new document only if there is no another document in this collection with this code
+```jsx
+import { fields, util } from  'react-common-admin';
+export  const  DocFields  = [
+	{
+		key: 'code',
+		label: 'Code',
+		// validators: { presence: true, length: { minimum: 3 } },
+		customValidation: function (field, value, data, formProps) {
+		const  validators  = { presence: true, length: { minimum: 3 } };
+		return util.validatorsAndIsUnique(validators, 'code', field, value, data, formProps)
+		},
+		component: TextInput
+	},
+	{
+		key: 'name',
+		label: 'Name',
+		validators: { presence: true, length: { minimum: 2 } },
+		component: TextInput
+	},
+]
+```
+
+### Need to keep another collection updating in each change ?
+```jsx
+// Option 1
+// Sync by react-parse refresh collection
+<CommonAdmin
+	schemaName='ItemType'
+	targetName={'ItemType-screen'}
+	keepSyncByTargetName={['ItemType-sideBar']}
+```
+// Option 2
+// Use on Fetch end callback
+```jsx
+<CommonAdmin
+	collectionProps={{
+		onFetchEnd: () => { /*do something...*/}
+	}}
 ```

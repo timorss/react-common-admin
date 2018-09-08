@@ -28,14 +28,18 @@ class TableView extends Component {
     const hasDelete = !this.props.disabledDelete && this.props.fetchProps && this.props.fetchProps.deleteDoc // react-parse cloudcode missing deleteDoc
     return (
       <ButtonGroup style={{display: 'flex'}}>
-        {this.props.draggableTable && <Button icon="bars" style={cursorMove} />}
+        {this.props.draggableTable &&
+          <Button style={cursorMove} className='ant-btn-icon-only'>
+            <i className="fa fa-arrows-alt paddingHorizontal2" />
+          </Button>
+        }
         <Button
           icon="edit"
           onClick={() => {
             if(this.props.customOnEdit) {
               this.props.customOnEdit(row.objectId, this.props)
             }else{
-              this.props.onEditDoc(row.objectId, this.props)
+              this.props.onEditDoc(row.objectId)
             }
           }}
         />

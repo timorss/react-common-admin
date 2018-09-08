@@ -40,6 +40,8 @@ class Page extends React.Component {
     this.toggleMinimized = this.toggleMinimized.bind(this);
     this.syncParamOnLoad = this.syncParamOnLoad.bind(this);
     this.onRefresh = this.onRefresh.bind(this);
+    this.onCollectionFetchEnd = this.onCollectionFetchEnd.bind(this);
+    this.onCollectionDeleteEnd = this.onCollectionDeleteEnd.bind(this);
     this.minimizedDocumentBeforeMe = 0
     this.lastVisibleDocumentsLength = null
   }
@@ -70,19 +72,39 @@ class Page extends React.Component {
    * @param {object} res react-parse onPostFinished response
    */
   onPostFinished(res) {
-    const { error, boomerang } = res;
+    const { error, boomerang, info } = res;
     if (error) {
       this.notification('error', 'onPostFailedMessage', res)
     } else {
       collectionActions.refreshCollection({ targetName: this.props.targetName });
-      this.closeDocumentModal(boomerang.modalId)
+      if(this.props.documentProps.stayOpenAfterPost) {
+        this.replaceTemporaryDocIdWithNewDocFromServer(boomerang.modalId, info.objectId)
+      }else {
+        this.closeDocumentModal(boomerang.modalId)
+      }
       this.notification('success', 'onPostMessage', res)
     }
     if (this.props.documentProps.onPostFinished) {
       this.props.documentProps.onPostFinished(res)
     }
   }
-
+  onCollectionFetchEnd(res) {
+    const {keepSyncByTargetName, collectionProps} = this.props;
+    if(keepSyncByTargetName) {
+      keepSyncByTargetName.forEach(targetName => {
+        collectionActions.refreshCollection({targetName})
+      })
+    }
+    if(collectionProps.onFetchEnd) {
+      collectionProps.onFetchEnd(res)
+    }
+  }
+  onCollectionDeleteEnd(res) {
+    this.notification('success', 'onDeleteMessage', res)
+    if(this.props.collectionProps.onDeleteEnd) {
+      this.props.collectionProps.onDeleteEnd(res)
+    }
+  }
   /**
    * @function onDeleteFinished
    * @param {object} res react-parse onDeleteFinished response
@@ -211,10 +233,21 @@ class Page extends React.Component {
    */
   syncParamOnLoad() {
     if (this.props.paramSync) {
-      const params = getParams() || {};
-      const visibleDocumentsFromParams = params.visibleDocuments
+      const params = getParams();
+      const visibleDocumentsFromParams = params.vd
       if (visibleDocumentsFromParams) {
-        this.setState({ visibleDocuments: JSON.parse(visibleDocumentsFromParams) })
+        let visibleDocuments = JSON.parse(visibleDocumentsFromParams)
+        visibleDocuments = visibleDocuments.map(item => {
+          //id, isOpen, dataFromCollection, newDoc, isMinimized, fullScreen
+          const _item = {}
+          _item.id = item.i;
+          _item.isOpen = item.o;
+          _item.isMinimized = item.m
+          _item.dataFromCollection = item.d
+          _item.fullScreen = item.f
+          return _item;
+        })
+        this.setState({ visibleDocuments })
       }
     }
   }
@@ -239,7 +272,7 @@ class Page extends React.Component {
    */
   onCreateNewDoc(dataFromCollection) {
     const { openAsFullDoc } = this.props
-    const visibleDocuments = [...this.state.visibleDocuments]
+    const visibleDocuments = [...this.state.visibleDocuments];
     const _dataFromCollection = (dataFromCollection && dataFromCollection.target) ? null : dataFromCollection // we didn't want input event
     visibleDocuments.push({ id: `new${this.state.docKey}`, isOpen: true, dataFromCollection: _dataFromCollection, newDoc: true, fullScreen: openAsFullDoc, isMinimized: false })
     this.setState({ docKey: this.state.docKey + 1 })
@@ -257,7 +290,7 @@ class Page extends React.Component {
     if (isDocumentIsAlreadyOpen) {
       notification.info('This document is already in use');
     } else {
-      const visibleDocuments = [...this.state.visibleDocuments]
+      const visibleDocuments = [...this.state.visibleDocuments];
       const _dataFromCollection = (dataFromCollection && dataFromCollection.target) ? null : dataFromCollection // we didn't want input event
       visibleDocuments.push({ id: docId, isOpen: true, dataFromCollection: _dataFromCollection, fullScreen: openAsFullDoc, isMinimized: false })
       this.setVisibleDocuments(visibleDocuments)
@@ -270,6 +303,21 @@ class Page extends React.Component {
    */
   closeDocumentModal(modalId) {
     const visibleDocuments = this.state.visibleDocuments.filter(item => item.id !== modalId)
+    this.setVisibleDocuments(visibleDocuments)
+  }
+  /**
+   * function replaceTemporaryDocIdWithNewDocFromServer
+   * Help us convert create doc to edit doc
+   * @param {string} modalId each Document have a unique key, objectId for existing docs and `new${this.state.docKey}` for new ones
+   */
+  replaceTemporaryDocIdWithNewDocFromServer(modalId, newObjectId) {
+    const visibleDocuments = this.state.visibleDocuments.map(item => {
+      if(item.id === modalId) {
+        item.id = newObjectId;
+        item.newDoc = false;
+      }
+      return item
+    })
     this.setVisibleDocuments(visibleDocuments)
   }
 
@@ -302,8 +350,40 @@ class Page extends React.Component {
       }
     }
     if (this.props.paramSync) {
-      setParams('visibleDocuments', JSON.stringify(visibleDocuments))
+      const _visibleDocuments = []
+      visibleDocuments.forEach(item => {
+        // id, isOpen, dataFromCollection, newDoc, isMinimized, fullScreen
+        if(!item.isOpen || item.newDoc) return
+        const _item = {}
+        _item.i = item.id;
+        _item.o = item.isOpen ? 1 : 0;
+        _item.m = item.isMinimized ? 1 : 0
+        _item.d = item.dataFromCollection
+        _item.f = item.fullScreen ? 1 : 0
+        _visibleDocuments.push(_item)
+      })
+      setParams('vd', JSON.stringify(_visibleDocuments))
     }
+  }
+
+  getInitialValue(fields, initialValue) {
+    if(this.initialValueFlag) { // We want getInitialValue to run only one time
+      return this.initialValue
+    }
+    let finalInitialValue = null;
+    let initialValueFromFields = null;
+    fields.forEach(item => {
+      if(typeof item.initialValue !== 'undefined') {
+        if(!initialValueFromFields) initialValueFromFields = {};
+        initialValueFromFields[item.key] = item.initialValue
+      }
+    })
+    if(initialValue || initialValueFromFields) {
+      finalInitialValue = {...initialValue, ...initialValueFromFields}
+    };
+    this.initialValue = finalInitialValue
+    this.initialValueFlag = true;
+    return finalInitialValue
   }
 
   /**
@@ -318,12 +398,15 @@ class Page extends React.Component {
       schemaName,
       documentProps,
       extraData,
-      showCollection
+      showCollection,
+      collectionData
     } = this.props;
     const { fields, showCloseButton, showDeleteButton, wrapper,
       viewComponent, saveOnBlur, skip, limit, query, onLimitChanged,
       parseDataBeforePost, parseDataBeforePut, // do not remove, we didn't want this on resDocumentProps, it will overwrite this.parseDataBeforePost...
-      onSkipChanged, onOrderChanged, onQueryChanged, messages, ...resDocumentProps } = documentProps;
+      onSkipChanged, onOrderChanged, onQueryChanged, messages, initialValue,
+      parseDataBeforeChange,
+      ...resDocumentProps } = documentProps;
     const visibleDocuments = this.getVisibleDocuments()
     this.minimizedDocumentBeforeMe = 0 // reset the minimizedDocumentBeforeMe, We count it when visibleDocuments.map is running
     return visibleDocuments.map(({ id, isOpen, dataFromCollection, newDoc, isMinimized, fullScreen }) => {
@@ -341,6 +424,7 @@ class Page extends React.Component {
           targetName={documentTargetName}
           schemaName={schemaName}
           objectId={isNew ? null : id}
+          collectionData={collectionData}
           // callbacks
           onPostFinished={this.onPostFinished}
           onDeleteFinished={this.onDeleteFinished}
@@ -377,6 +461,8 @@ class Page extends React.Component {
           messages={messages}
           dataFromCollection={dataFromCollection}
           onRefresh={this.onRefresh}
+          initialValue={this.getInitialValue(fields, initialValue)}
+          parseDataBeforeChange={parseDataBeforeChange}
         />
       );
     })
@@ -424,6 +510,8 @@ class Page extends React.Component {
         // this is the view that get all collection props {onQueryChanged,skip,limit,fetchProps,showLoader,onEditDoc,onCreateNewDoc,extraData   ...collectionProps}, fetchProps is react-parse response
         viewComponent={viewComponent || DefaultTable}
         onRefresh={this.onRefresh}
+        onDeleteEnd={this.onCollectionDeleteEnd}
+        onFetchEnd={this.onCollectionFetchEnd}
         {...tableProps}
         {...resCollectionProps}
       />
@@ -431,13 +519,14 @@ class Page extends React.Component {
   }
 
   render() {
-    const { title, showPageHeader, showCollection } = this.props;
+    const { title, showPageHeader, showCollection, isChild } = this.props;
     return (
-      <Layout className={'rca-main'}>
+      <Layout className={`rca-main ${isChild ? 'rca-child' : ''}`}>
         <Layout>
-          <Layout.Header className={'rca-main-pageHeader'}>
-            {showPageHeader && <ContainerHeader title={title} />}
+          {showPageHeader && <Layout.Header className={'rca-main-pageHeader'}>
+            <ContainerHeader title={title} />
           </Layout.Header>
+          }
           <Layout.Content className={'rca-main-pageContent'} >
             {showCollection && this.renderCollection()}
             {(!showCollection) && this.renderDocuments()}
@@ -462,6 +551,7 @@ const mapStateToProps = (state, { targetName, fetchExtraData }) => {
     });
   }
   return {
+    collectionData: selectors.selectCollectionData(state, targetName),
     showLoader: selectors.selectCollectionLoading(state, targetName),
     error: selectors.selectCollectionError(state, targetName),
     extraData
@@ -478,7 +568,8 @@ Page.defaultProps = {
   showCollection: true,
   openAsFullDoc: true,
   paramSync: true,
-  refreshExtraDataOnRefresh: true
+  isChild: false,
+  refreshExtraDataOnRefresh: true,
 };
 Page.propTypes = {
   showPageHeader: PropTypes.bool,

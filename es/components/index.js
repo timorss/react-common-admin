@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.DraggableTable = exports.StaticDoc = exports.Gallery = exports.Table = exports.DocForm = exports.SideModal = exports.Loader = exports.ContainerHeader = exports.Layout = undefined;
+exports.Modal = exports.DraggableTable = exports.StaticDoc = exports.Gallery = exports.Table = exports.DocForm = exports.SideModal = exports.Loader = exports.ContainerHeader = exports.Layout = undefined;
 
 var _layout = require('antd/lib/layout');
 
@@ -25,6 +25,10 @@ var _Loader2 = _interopRequireDefault(_Loader);
 var _SideModal = require('./SideModal');
 
 var _SideModal2 = _interopRequireDefault(_SideModal);
+
+var _Modal = require('./Modal');
+
+var _Modal2 = _interopRequireDefault(_Modal);
 
 var _DocForm = require('./DocForm');
 
@@ -56,3 +60,4 @@ exports.Table = _Table2.default;
 exports.Gallery = _Gallery2.default;
 exports.StaticDoc = _StaticDoc2.default;
 exports.DraggableTable = _DraggableTable2.default;
+exports.Modal = _Modal2.default;

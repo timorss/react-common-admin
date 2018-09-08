@@ -20,7 +20,8 @@ export default class DocWrapper extends React.Component {
       targetName, schemaName, fields, objectId, viewComponent,
       extraData, fieldsOptions, messages, dataFromCollection,
       modalId, minimizedDocumentBeforeMe, toggleMinimized, toggleFullScreen,
-      onPostFinished, onDeleteFinished, onPutFinished, isMinimized, fullScreen, onRefresh,
+      onPostFinished, onDeleteFinished, onPutFinished, isMinimized, fullScreen, onRefresh, collectionData,
+      parseDataBeforeChange,
       ...resProps } = this.props
     const WrapperElement = this.props.wrapper
     const title = customTitle ? customTitle({state: this.state, props: this.props}) : (objectId ? `Edit - ${objectId}` : 'Create New Doc')
@@ -65,6 +66,11 @@ export default class DocWrapper extends React.Component {
           modalId={modalId}
           dataFromCollection={dataFromCollection}
           onRefresh={onRefresh}
+          // collectionData
+          collectionData={collectionData}
+          //
+          parseDataBeforeChange={parseDataBeforeChange}
+          //
           {...resProps}
         />
       </WrapperElement>

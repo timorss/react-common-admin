@@ -79,6 +79,8 @@ var Page = function (_React$Component) {
     _this.toggleMinimized = _this.toggleMinimized.bind(_this);
     _this.syncParamOnLoad = _this.syncParamOnLoad.bind(_this);
     _this.onRefresh = _this.onRefresh.bind(_this);
+    _this.onCollectionFetchEnd = _this.onCollectionFetchEnd.bind(_this);
+    _this.onCollectionDeleteEnd = _this.onCollectionDeleteEnd.bind(_this);
     _this.minimizedDocumentBeforeMe = 0;
     _this.lastVisibleDocumentsLength = null;
     return _this;
@@ -120,20 +122,48 @@ var Page = function (_React$Component) {
     key: 'onPostFinished',
     value: function onPostFinished(res) {
       var error = res.error,
-          boomerang = res.boomerang;
+          boomerang = res.boomerang,
+          info = res.info;
 
       if (error) {
         this.notification('error', 'onPostFailedMessage', res);
       } else {
         _reactParse.collectionActions.refreshCollection({ targetName: this.props.targetName });
-        this.closeDocumentModal(boomerang.modalId);
+        if (this.props.documentProps.stayOpenAfterPost) {
+          this.replaceTemporaryDocIdWithNewDocFromServer(boomerang.modalId, info.objectId);
+        } else {
+          this.closeDocumentModal(boomerang.modalId);
+        }
         this.notification('success', 'onPostMessage', res);
       }
       if (this.props.documentProps.onPostFinished) {
         this.props.documentProps.onPostFinished(res);
       }
     }
+  }, {
+    key: 'onCollectionFetchEnd',
+    value: function onCollectionFetchEnd(res) {
+      var _props = this.props,
+          keepSyncByTargetName = _props.keepSyncByTargetName,
+          collectionProps = _props.collectionProps;
 
+      if (keepSyncByTargetName) {
+        keepSyncByTargetName.forEach(function (targetName) {
+          _reactParse.collectionActions.refreshCollection({ targetName: targetName });
+        });
+      }
+      if (collectionProps.onFetchEnd) {
+        collectionProps.onFetchEnd(res);
+      }
+    }
+  }, {
+    key: 'onCollectionDeleteEnd',
+    value: function onCollectionDeleteEnd(res) {
+      this.notification('success', 'onDeleteMessage', res);
+      if (this.props.collectionProps.onDeleteEnd) {
+        this.props.collectionProps.onDeleteEnd(res);
+      }
+    }
     /**
      * @function onDeleteFinished
      * @param {object} res react-parse onDeleteFinished response
@@ -228,9 +258,9 @@ var Page = function (_React$Component) {
   }, {
     key: 'getExtraDataAsFieldsOptions',
     value: function getExtraDataAsFieldsOptions() {
-      var _props = this.props,
-          extraData = _props.extraData,
-          documentProps = _props.documentProps;
+      var _props2 = this.props,
+          extraData = _props2.extraData,
+          documentProps = _props2.documentProps;
       var fields = documentProps.fields;
 
       var fieldsOptions = {};
@@ -297,10 +327,21 @@ var Page = function (_React$Component) {
     key: 'syncParamOnLoad',
     value: function syncParamOnLoad() {
       if (this.props.paramSync) {
-        var params = (0, _configuration.getParams)() || {};
-        var visibleDocumentsFromParams = params.visibleDocuments;
+        var params = (0, _configuration.getParams)();
+        var visibleDocumentsFromParams = params.vd;
         if (visibleDocumentsFromParams) {
-          this.setState({ visibleDocuments: JSON.parse(visibleDocumentsFromParams) });
+          var visibleDocuments = JSON.parse(visibleDocumentsFromParams);
+          visibleDocuments = visibleDocuments.map(function (item) {
+            //id, isOpen, dataFromCollection, newDoc, isMinimized, fullScreen
+            var _item = {};
+            _item.id = item.i;
+            _item.isOpen = item.o;
+            _item.isMinimized = item.m;
+            _item.dataFromCollection = item.d;
+            _item.fullScreen = item.f;
+            return _item;
+          });
+          this.setState({ visibleDocuments: visibleDocuments });
         }
       }
     }
@@ -377,6 +418,24 @@ var Page = function (_React$Component) {
       });
       this.setVisibleDocuments(visibleDocuments);
     }
+    /**
+     * function replaceTemporaryDocIdWithNewDocFromServer
+     * Help us convert create doc to edit doc
+     * @param {string} modalId each Document have a unique key, objectId for existing docs and `new${this.state.docKey}` for new ones
+     */
+
+  }, {
+    key: 'replaceTemporaryDocIdWithNewDocFromServer',
+    value: function replaceTemporaryDocIdWithNewDocFromServer(modalId, newObjectId) {
+      var visibleDocuments = this.state.visibleDocuments.map(function (item) {
+        if (item.id === modalId) {
+          item.id = newObjectId;
+          item.newDoc = false;
+        }
+        return item;
+      });
+      this.setVisibleDocuments(visibleDocuments);
+    }
   }, {
     key: 'toggleMinimized',
     value: function toggleMinimized(modalId) {
@@ -410,8 +469,42 @@ var Page = function (_React$Component) {
         }
       }
       if (this.props.paramSync) {
-        (0, _configuration.setParams)('visibleDocuments', JSON.stringify(visibleDocuments));
+        var _visibleDocuments = [];
+        visibleDocuments.forEach(function (item) {
+          // id, isOpen, dataFromCollection, newDoc, isMinimized, fullScreen
+          if (!item.isOpen || item.newDoc) return;
+          var _item = {};
+          _item.i = item.id;
+          _item.o = item.isOpen ? 1 : 0;
+          _item.m = item.isMinimized ? 1 : 0;
+          _item.d = item.dataFromCollection;
+          _item.f = item.fullScreen ? 1 : 0;
+          _visibleDocuments.push(_item);
+        });
+        (0, _configuration.setParams)('vd', JSON.stringify(_visibleDocuments));
       }
+    }
+  }, {
+    key: 'getInitialValue',
+    value: function getInitialValue(fields, initialValue) {
+      if (this.initialValueFlag) {
+        // We want getInitialValue to run only one time
+        return this.initialValue;
+      }
+      var finalInitialValue = null;
+      var initialValueFromFields = null;
+      fields.forEach(function (item) {
+        if (typeof item.initialValue !== 'undefined') {
+          if (!initialValueFromFields) initialValueFromFields = {};
+          initialValueFromFields[item.key] = item.initialValue;
+        }
+      });
+      if (initialValue || initialValueFromFields) {
+        finalInitialValue = _extends({}, initialValue, initialValueFromFields);
+      };
+      this.initialValue = finalInitialValue;
+      this.initialValueFlag = true;
+      return finalInitialValue;
     }
 
     /**
@@ -426,12 +519,13 @@ var Page = function (_React$Component) {
     value: function renderDocuments() {
       var _this3 = this;
 
-      var _props2 = this.props,
-          targetName = _props2.targetName,
-          schemaName = _props2.schemaName,
-          documentProps = _props2.documentProps,
-          extraData = _props2.extraData,
-          showCollection = _props2.showCollection;
+      var _props3 = this.props,
+          targetName = _props3.targetName,
+          schemaName = _props3.schemaName,
+          documentProps = _props3.documentProps,
+          extraData = _props3.extraData,
+          showCollection = _props3.showCollection,
+          collectionData = _props3.collectionData;
 
       var fields = documentProps.fields,
           showCloseButton = documentProps.showCloseButton,
@@ -449,7 +543,9 @@ var Page = function (_React$Component) {
           onOrderChanged = documentProps.onOrderChanged,
           onQueryChanged = documentProps.onQueryChanged,
           messages = documentProps.messages,
-          resDocumentProps = _objectWithoutProperties(documentProps, ['fields', 'showCloseButton', 'showDeleteButton', 'wrapper', 'viewComponent', 'saveOnBlur', 'skip', 'limit', 'query', 'onLimitChanged', 'parseDataBeforePost', 'parseDataBeforePut', 'onSkipChanged', 'onOrderChanged', 'onQueryChanged', 'messages']);
+          initialValue = documentProps.initialValue,
+          parseDataBeforeChange = documentProps.parseDataBeforeChange,
+          resDocumentProps = _objectWithoutProperties(documentProps, ['fields', 'showCloseButton', 'showDeleteButton', 'wrapper', 'viewComponent', 'saveOnBlur', 'skip', 'limit', 'query', 'onLimitChanged', 'parseDataBeforePost', 'parseDataBeforePut', 'onSkipChanged', 'onOrderChanged', 'onQueryChanged', 'messages', 'initialValue', 'parseDataBeforeChange']);
 
       var visibleDocuments = this.getVisibleDocuments();
       this.minimizedDocumentBeforeMe = 0; // reset the minimizedDocumentBeforeMe, We count it when visibleDocuments.map is running
@@ -474,7 +570,8 @@ var Page = function (_React$Component) {
           // data
           , targetName: documentTargetName,
           schemaName: schemaName,
-          objectId: isNew ? null : id
+          objectId: isNew ? null : id,
+          collectionData: collectionData
           // callbacks
           , onPostFinished: _this3.onPostFinished,
           onDeleteFinished: _this3.onDeleteFinished,
@@ -510,7 +607,9 @@ var Page = function (_React$Component) {
           onQueryChanged: onQueryChanged,
           messages: messages,
           dataFromCollection: dataFromCollection,
-          onRefresh: _this3.onRefresh
+          onRefresh: _this3.onRefresh,
+          initialValue: _this3.getInitialValue(fields, initialValue),
+          parseDataBeforeChange: parseDataBeforeChange
         }));
       });
     }
@@ -527,14 +626,14 @@ var Page = function (_React$Component) {
     value: function renderCollection() {
       var _this4 = this;
 
-      var _props3 = this.props,
-          showLoader = _props3.showLoader,
-          title = _props3.title,
-          targetName = _props3.targetName,
-          schemaName = _props3.schemaName,
-          collectionProps = _props3.collectionProps,
-          extraData = _props3.extraData,
-          functionName = _props3.functionName;
+      var _props4 = this.props,
+          showLoader = _props4.showLoader,
+          title = _props4.title,
+          targetName = _props4.targetName,
+          schemaName = _props4.schemaName,
+          collectionProps = _props4.collectionProps,
+          extraData = _props4.extraData,
+          functionName = _props4.functionName;
 
       var fields = collectionProps.fields,
           viewComponent = collectionProps.viewComponent,
@@ -571,27 +670,30 @@ var Page = function (_React$Component) {
         showLoader: showLoader
         // this is the view that get all collection props {onQueryChanged,skip,limit,fetchProps,showLoader,onEditDoc,onCreateNewDoc,extraData   ...collectionProps}, fetchProps is react-parse response
         , viewComponent: viewComponent || _index.Table,
-        onRefresh: this.onRefresh
+        onRefresh: this.onRefresh,
+        onDeleteEnd: this.onCollectionDeleteEnd,
+        onFetchEnd: this.onCollectionFetchEnd
       }, tableProps, resCollectionProps));
     }
   }, {
     key: 'render',
     value: function render() {
-      var _props4 = this.props,
-          title = _props4.title,
-          showPageHeader = _props4.showPageHeader,
-          showCollection = _props4.showCollection;
+      var _props5 = this.props,
+          title = _props5.title,
+          showPageHeader = _props5.showPageHeader,
+          showCollection = _props5.showCollection,
+          isChild = _props5.isChild;
 
       return _react2.default.createElement(
         _index.Layout,
-        { className: 'rca-main' },
+        { className: 'rca-main ' + (isChild ? 'rca-child' : '') },
         _react2.default.createElement(
           _index.Layout,
           null,
-          _react2.default.createElement(
+          showPageHeader && _react2.default.createElement(
             _index.Layout.Header,
             { className: 'rca-main-pageHeader' },
-            showPageHeader && _react2.default.createElement(_index.ContainerHeader, { title: title })
+            _react2.default.createElement(_index.ContainerHeader, { title: title })
           ),
           _react2.default.createElement(
             _index.Layout.Content,
@@ -621,6 +723,7 @@ var mapStateToProps = function mapStateToProps(state, _ref3) {
     });
   }
   return {
+    collectionData: _reactParse.selectors.selectCollectionData(state, targetName),
     showLoader: _reactParse.selectors.selectCollectionLoading(state, targetName),
     error: _reactParse.selectors.selectCollectionError(state, targetName),
     extraData: extraData
@@ -635,6 +738,7 @@ Page.defaultProps = {
   showCollection: true,
   openAsFullDoc: true,
   paramSync: true,
+  isChild: false,
   refreshExtraDataOnRefresh: true
 };
 Page.propTypes = process.env.NODE_ENV !== "production" ? {

@@ -1,3 +1,4 @@
+
 import validateJs from 'validate.js';
 import find from 'lodash/find'
 
@@ -73,7 +74,6 @@ export const getFieldValidatorMessage = function (field, value) {
   return message && message[0]
 }
 export const selectOptionsFromExtraData = function (field, extraData = {}) {
-  debugger
   if(field.type === 'pointer') {
     return extraData[field.pointerTo]
   }
@@ -98,3 +98,64 @@ export const createPointer = function (schemaName, objectId) {
     __type: 'Pointer',
   };
 };
+
+/**
+ * @function syncChangedWithOtherField
+ * use it inside fieldConfig like that:
+  {
+    key: 'name',
+    label: 'Name',
+    validators: { presence: true, length: { minimum: 2 } },
+    component: fields.TextInput,
+    onChanged: (field, props) => {
+      const _field = {...field}
+      _field.value = startCase(_field.value)
+      util.syncChangedWithOtherField(_field, props, 'label')
+    },
+  },
+  {
+    key: 'label',
+    label: 'Label',
+    validators: { presence: true, length: { minimum: 2 } },
+    component: fields.TextInput,
+  },
+ */
+export const syncChangedWithOtherField = function (field, props, otherFieldKey, onlyWhenEmpty = true) {
+  const otherFieldProps = props.getOtherFieldRefByKey(otherFieldKey).parent.props; // otherFieldProps came from react-cross-form
+  const otherFieldKeyValue = otherFieldProps.value
+  if(!onlyWhenEmpty || (!otherFieldKeyValue || otherFieldKeyValue === '')) {
+    otherFieldProps.onChangeAndBlur(field.value)
+  }
+};
+
+/**
+ * @function validatorsAndIsUnique
+ * use it inside fieldConfig like that:
+  {
+    key: 'code',
+    label: 'Code',
+    // validators: { presence: true, length: { minimum: 3 } },
+    customValidation: function (field, value, data, formProps) {
+      const validators = { presence: true, length: { minimum: 3 } };
+      return util.validatorsAndIsUnique(validators, 'code', field, value, data, formProps)
+    },
+    component: TextInput
+  },
+ */
+export const validatorsAndIsUnique = function (validators, keyToCheck, field, value, data, formProps) {
+  const collectionData = formProps.resProps.collectionData || []
+  let errors = []
+  if(!value || value === '') {
+    errors = validateJs.single(value, validators)
+  } else{
+    const docWithTheSameValue = collectionData.find(item => (item[keyToCheck] === value && item.objectId !== data.objectId))
+    if(docWithTheSameValue) {
+      errors.push('The value is already used by other option')
+    }else{
+      errors = validateJs.single(value, validators)
+    }
+  }
+  return errors
+};
+
+

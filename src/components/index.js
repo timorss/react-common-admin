@@ -2,6 +2,7 @@
 import ContainerHeader from './ContainerHeader'
 import Loader from './Loader'
 import SideModal from './SideModal'
+import Modal from './Modal'
 import DocForm from './DocForm'
 import Table from './Table'
 import Gallery from './Gallery'
@@ -17,5 +18,6 @@ export {
   Table,
   Gallery,
   StaticDoc,
-  DraggableTable
+  DraggableTable,
+  Modal
 }

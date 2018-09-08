@@ -170,7 +170,7 @@ var GalleryView = function (_Component) {
                     'a',
                     { onClick: function onClick() {
                         _this3.props.onEditDoc(objectId);
-                      } },
+                      }, className: 'rca-g-editBtn' },
                     _react2.default.createElement(_antd.Icon, { type: 'edit' })
                   ),
                   _react2.default.createElement(
@@ -184,7 +184,7 @@ var GalleryView = function (_Component) {
                       okText: 'Yes',
                       cancelText: 'No'
                     },
-                    _react2.default.createElement(_antd.Icon, { type: 'delete' })
+                    _react2.default.createElement(_antd.Icon, { type: 'delete', className: 'rca-g-deleteBtn' })
                   )
                 )]
               },

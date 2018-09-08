@@ -120,20 +120,30 @@ var DocForm = function (_React$Component) {
 
   }, {
     key: 'onChange',
-    value: function onChange(_ref4) {
-      var key = _ref4.key,
-          value = _ref4.value,
-          info = _ref4.info,
-          isValid = _ref4.isValid;
+    value: function onChange(payload) {
+      var _props3 = this.props,
+          fetchProps = _props3.fetchProps,
+          parseDataBeforeChange = _props3.parseDataBeforeChange,
+          objectId = _props3.objectId;
 
+      var _payload = payload;
+      if (parseDataBeforeChange) {
+        _payload = parseDataBeforeChange(payload, fetchProps.data);
+      }
+      var _payload2 = _payload,
+          key = _payload2.key,
+          value = _payload2.value,
+          info = _payload2.info,
+          isValid = _payload2.isValid;
       // We need to know that fileInclude for the post with files if needed
+
       if (info && info.fileInclude) {
         this.toggleFileInclude(true, info.fileValueHandler);
       }
       // Make the local update
-      this.props.fetchProps.updateField(key, value);
+      fetchProps.updateField(key, value);
       // Put to Server if it is a existing document
-      if (this.props.objectId && info && info.putOnChange) {
+      if (objectId && info && info.putOnChange) {
         // Value is valid
         if (isValid) {
           this.onPut({
@@ -181,14 +191,23 @@ var DocForm = function (_React$Component) {
   }, {
     key: 'onBlur',
     value: function onBlur(payload) {
-      var _props3 = this.props,
-          objectId = _props3.objectId,
-          saveOnBlur = _props3.saveOnBlur;
-      var key = payload.key,
-          initialValue = payload.initialValue,
-          isValid = payload.isValid,
-          info = payload.info,
-          value = payload.value;
+      var _props4 = this.props,
+          objectId = _props4.objectId,
+          saveOnBlur = _props4.saveOnBlur;
+      var _props5 = this.props,
+          fetchProps = _props5.fetchProps,
+          parseDataBeforeChange = _props5.parseDataBeforeChange;
+
+      var _payload = payload;
+      if (parseDataBeforeChange) {
+        _payload = parseDataBeforeChange(payload, fetchProps.data);
+      }
+      var _payload3 = _payload,
+          key = _payload3.key,
+          initialValue = _payload3.initialValue,
+          isValid = _payload3.isValid,
+          info = _payload3.info,
+          value = _payload3.value;
 
       var _value = value;
       // override the value if info contain a value
@@ -252,18 +271,18 @@ var DocForm = function (_React$Component) {
   }, {
     key: 'onDelete',
     value: function onDelete() {
-      var _props4 = this.props,
-          fetchProps = _props4.fetchProps,
-          modalId = _props4.modalId;
+      var _props6 = this.props,
+          fetchProps = _props6.fetchProps,
+          modalId = _props6.modalId;
 
       fetchProps.deleteDoc(null, { modalId: modalId });
     }
   }, {
     key: 'onRefresh',
     value: function onRefresh() {
-      var _props5 = this.props,
-          fetchProps = _props5.fetchProps,
-          onRefresh = _props5.onRefresh;
+      var _props7 = this.props,
+          fetchProps = _props7.fetchProps,
+          onRefresh = _props7.onRefresh;
 
       fetchProps.refresh();
       if (onRefresh) {
@@ -275,18 +294,21 @@ var DocForm = function (_React$Component) {
     value: function render() {
       var _this2 = this;
 
-      var _props6 = this.props,
-          onClose = _props6.onClose,
-          objectId = _props6.objectId,
-          saveOnBlur = _props6.saveOnBlur,
-          fetchProps = _props6.fetchProps,
-          fields = _props6.fields,
-          fieldsOptions = _props6.fieldsOptions,
-          showCloseButton = _props6.showCloseButton,
-          showDeleteButton = _props6.showDeleteButton;
+      var _props8 = this.props,
+          onClose = _props8.onClose,
+          objectId = _props8.objectId,
+          saveOnBlur = _props8.saveOnBlur,
+          fetchProps = _props8.fetchProps,
+          fields = _props8.fields,
+          fieldsOptions = _props8.fieldsOptions,
+          showCloseButton = _props8.showCloseButton,
+          showDeleteButton = _props8.showDeleteButton,
+          collectionData = _props8.collectionData;
       var refresh = fetchProps.refresh,
           put = fetchProps.put,
-          data = fetchProps.data;
+          data = fetchProps.data,
+          isLoading = fetchProps.isLoading,
+          dispatchId = fetchProps.dispatchId;
 
       var isFirstLoading = objectId && (0, _isEmpty2.default)(data);
       return _react2.default.createElement(
@@ -302,14 +324,18 @@ var DocForm = function (_React$Component) {
             onChange: this.onChange,
             onBlur: this.onBlur,
             onChangeAndBlur: this.onChangeAndBlur,
-            onValidateStateChanged: function onValidateStateChanged(_ref5) {
-              var isValid = _ref5.isValid,
-                  unValidFields = _ref5.unValidFields;
+            onValidateStateChanged: function onValidateStateChanged(_ref4) {
+              var isValid = _ref4.isValid,
+                  unValidFields = _ref4.unValidFields;
 
               _this2.setState({ isFormValid: isValid });
             },
             toggleFileInclude: this.toggleFileInclude,
-            fieldsOptions: fieldsOptions
+            fieldsOptions: fieldsOptions,
+            collectionData: collectionData,
+            isLoading: isLoading,
+            dispatchId: dispatchId,
+            documentProps: this.props
           })
         ),
         _react2.default.createElement(
