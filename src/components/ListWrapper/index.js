@@ -10,8 +10,7 @@ import {
   Spin
 } from 'antd';
 
-import { buildQuery } from '../../utils/helpers';
-import { isEmptyString } from 'src/logic/helpers';
+import { buildQuery, isEmptyString } from '../../utils/helpers';
 
 const Search = Input.Search;
 

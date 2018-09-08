@@ -159,3 +159,6 @@ export const validatorsAndIsUnique = function (validators, keyToCheck, field, va
 };
 
 
+export const isEmptyString = function (str) {
+  return str === undefined || str === null || str.trim().length === 0;
+};

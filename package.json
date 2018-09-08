@@ -1,6 +1,6 @@
 {
   "name": "react-common-admin",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "A react page container that works with [react-parse](https://www.npmjs.com/package/react-parse)  to fetch data from server and display as table/gallery or customs component.",
   "main": "lib/index.js",
   "scripts": {

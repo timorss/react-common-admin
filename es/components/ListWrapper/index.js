@@ -14,8 +14,6 @@ var _antd = require('antd');
 
 var _helpers = require('../../utils/helpers');
 
-var _helpers2 = require('src/logic/helpers');
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
@@ -269,7 +267,7 @@ var ListWrapper = function (_Component) {
           subTitle = _props4.subTitle;
 
       var isLoading = this.props.isLoading || fetchProps.isLoading;
-      var hasSubTitle = (0, _helpers2.isEmptyString)(subTitle);
+      var hasSubTitle = (0, _helpers.isEmptyString)(subTitle);
       return _react2.default.createElement(
         'div',
         { className: 'rca-listWrapper-Screen' },
