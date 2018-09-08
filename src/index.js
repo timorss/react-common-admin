@@ -1,8 +1,8 @@
 import CommonAdmin from './CommonAdmin';
 import * as formatters from './utils/formatters';
-import * as fields from '../react-cross-inputs';
+import * as fields from 'react-cross-inputs';
 
-import Form, {buildValidateJsObject} from '../react-cross-form';
+import Form, {buildValidateJsObject} from 'react-cross-form';
 import {initCommonAdmin, customTitle} from './configuration';
 import * as util from './utils/helpers'
 
