@@ -22,27 +22,21 @@ class DraggableTable extends React.Component {
     let hoverValue = hoverRow[orderKey]
     let newDragValue
     let newHoverValue
-    debugger;
     if(typeof dragValue === 'undefined' && typeof hoverValue === 'undefined') {
       newDragValue = 1;
       newHoverValue = 0;
-      debugger;
     }else{
       if(typeof dragValue === 'undefined') {
-        debugger;
         newDragValue = hoverValue + 1
       } else if(typeof hoverValue === 'undefined') {
-        debugger;
         newHoverValue = dragValue - 1
       }else{
-        debugger;
         newDragValue = hoverRow[orderKey]
         newHoverValue = dragRow[orderKey]
       }
     }
     const dragRowNewData = {[orderKey]: newDragValue}
     const hoverRowNewData = {[orderKey]: newHoverValue}
-    debugger
     if(groupBy && dragRow[groupBy] !== hoverRow[groupBy]) {
       dragRowNewData[groupBy] = hoverRow[groupBy]
       dragRowNewData[orderKey] = this.getSortData(hoverRow[groupBy]).length

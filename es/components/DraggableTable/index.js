@@ -57,27 +57,21 @@ var DraggableTable = function (_React$Component) {
       var hoverValue = hoverRow[orderKey];
       var newDragValue = void 0;
       var newHoverValue = void 0;
-      debugger;
       if (typeof dragValue === 'undefined' && typeof hoverValue === 'undefined') {
         newDragValue = 1;
         newHoverValue = 0;
-        debugger;
       } else {
         if (typeof dragValue === 'undefined') {
-          debugger;
           newDragValue = hoverValue + 1;
         } else if (typeof hoverValue === 'undefined') {
-          debugger;
           newHoverValue = dragValue - 1;
         } else {
-          debugger;
           newDragValue = hoverRow[orderKey];
           newHoverValue = dragRow[orderKey];
         }
       }
       var dragRowNewData = _defineProperty({}, orderKey, newDragValue);
       var hoverRowNewData = _defineProperty({}, orderKey, newHoverValue);
-      debugger;
       if (groupBy && dragRow[groupBy] !== hoverRow[groupBy]) {
         dragRowNewData[groupBy] = hoverRow[groupBy];
         dragRowNewData[orderKey] = _this.getSortData(hoverRow[groupBy]).length;
