@@ -1,7 +1,7 @@
 
 # react-common-admin
 
-A react page container that works with [react-parse](https://www.npmjs.com/package/react-parse)  to fetch data from server and display as table/gallery or customs component.
+A react page container that works with [react-parse](https://www.npmjs.com/package/react-parse)  to fetch data from server and display as table/gallery ( or customs component) with easy form to edit/create a new documents.
 
 
 ![enter image description here](https://lh3.googleusercontent.com/SIsABVRWjGloAHiU2wrcRJGA2aGyeaE4k5V_y3hFeUwYdCyKReNNFmlzZtE6k7hKvic8tGkaV4Vyqg "screenRecord")
@@ -57,124 +57,63 @@ A react page container that works with [react-parse](https://www.npmjs.com/packa
  1. First you need to install:
 [Ant Design](https://ant.design/) 
 
- 2.2- Install react-common-admin
+2. Install react-common-admin
+	```
 	npm i react-common-admin --save
 	```
+ 3. Init react-common-admin
+	```jsx
+	// Inside your root componen
+	import { initCommonAdmin } from  'react-common-admin';
+	import  Router  from  'next/router'; // You can use any Router service you want
+		 
+	const  notification  = {
+		success: (message) => console.log('success', message),
+		error: (message) => console.log('error', message),
+		info: (message) =>  console.log('info', message),
+		warning: (message) => console.log('warning', message),
+		warn: (message) =>  console.log('warn', message),
+	}
+	const  defaultDocumentMessages  = {
+		onPostMessage: 'Created successfully',
+		onPostFailedMessage: 'document - Created failed',
+		onPutMessage: 'Update successfully',
+		onPutFailedMessage: 'document - Update failed',
+		onDeleteMessage: ' Deleted successfully',
+		onDeleteFailedMessage: ' Deleted failed'
+	}
 
- 3.3- Init react-common-admin
-     
-	 ```jsx
-	 //     inside your root component
-	 
-```bash
-import { initCommonAdmin } from  'react-common-admin';
-	 
+	const  customTitle  =  function ({ state, props }) {
+			const { data } =  state;
+			const { objectId, schemaName, titleKey } =  props
+			let  title  =  '';
+			const  isNew  =  !objectId;
+			if (isNew) {
+			title  = `Create a New ${schemaName} document`
+			} else {
+			let  titleFromKey  = (titleKey  &&  data) ? data[titleKey] :  ''
+			let  hasTitle  = titleFromKey.length
+			title  = `Edit ${schemaName} document - ${hasTitle  ?  titleFromKey  :  objectId}`
+		}
+		return  title;
+	}
+	
+	const setParams = function (key, value) {
+		const href =`${Router.pathname}?${key}=${value}` 
+		Router.push(href, as, { shallow: true }) 
+	}
 	initCommonAdmin({
-		notification,
-		defaultDocumentMessages,
-		langDir,
-		customTitle,
-		setParams,
-		getParams
-	})
+			notification,
+			defaultDocumentMessages,
+			langDir: 'ltr',
+			customTitle,
+			setParams,
+			getParams: () => Router.query
+		})
+
 	```
 
-
-
-
-## Init react-common-admin
-initCommonAdmin exmples for of the options
-### notification 
-```jsx
-/*
-	notification service -
-	You can pass a notification service and
-	react-common-admin will trigger a notification
-	in each put/post/delete action
-*/
-const  notification  = {
-	success: (message) => console.log('success', message),
-	error: (message) => console.log('error', message),
-	info: (message) =>  console.log('info', message),
-	warning: (message) => console.log('warning', message),
-	warn: (message) =>  console.log('warn', message),
-}
-```
-### defaultDocumentMessages
-```jsx
-/*
-	notification default messages -
-	You can pass a default notification messages
-*/
-const  defaultDocumentMessages  = {
-	onPostMessage: 'Created successfully',
-	onPostFailedMessage: 'document - Created failed',
-	onPutMessage: 'Update successfully',
-	onPutFailedMessage: 'document - Update failed',
-	onDeleteMessage: ' Deleted successfully',
-	onDeleteFailedMessage: ' Deleted failed'
-}
-```
-### langDir
-```jsx
-const langDir = 'ltr' // You can set 'rtl' or 'ltr'
-```
-### customTitle
-```jsx
-/*
-	document customTitle-
-	You can pass a function that get a
-	props and return the title to diaplay
-	in the document header
-*/
-const  customTitle  =  function ({ state, props }) {
-	const { data } =  state;
-	const { objectId, schemaName, titleKey } =  props
-	let  title  =  '';
-	const  isNew  =  !objectId;
-	if (isNew) {
-	title  = `Create a New ${schemaName} document`
-	} else {
-	let  titleFromKey  = (titleKey  &&  data) ? data[titleKey] :  ''
-	let  hasTitle  = titleFromKey.length
-	title  = `Edit ${schemaName} document - ${hasTitle  ?  titleFromKey  :  objectId}`
-}
-return  title;
-}
-```
-### setParams
-```jsx
-/*
-	If you want to persist the user work when the page is full reload,
-	we need an access to URL params, pass setParams and setParams
-*/ se
-const ar =   setParams  =  function (key, value) {
-	const href  =  `${Router.pathname}?${key}=${value}`
-	const  as  =  href
-	Router.push(href, as, { shallow:  true })
-}
-```
-### getParams
-```jsx
-import  Router  from  'next/router'; // You can use any Router service you want
-
-const  getParams  =  function () {
-	return  Router.query
-}
-```
-
-
 ## Basic Usage
-
-> You can use any inputs you want, not only from library fields
-
-
-const  getParams  =  function () {
-	return  Router.query
-}
-
-//--- ntional confuratnmon a efoutese, a, sote })
-
 
 ```jsx
 import  React  from  'react';
@@ -185,7 +124,7 @@ const DocFields = [ // See react-cross-form
 	key: 'firstName',
 	label: 'First Name',
 	validators: { presence: true, length: { minimum: 2 } },
-	component: fields.TextInput
+	component: fields.TextInput //You can use any inputs you want, not only from library fields
 }]
 
 const TableField = [
@@ -233,7 +172,7 @@ refreshExtraDataOnRefresh|boolean<br/><small>default: true<small></small></small
 ## documentProps
 | key | type | Description|
 |-----|--|--|
-fields|array <br/><small>required<small></small></small>| we use [react-cross-form](https://github.com/doronnahum/react-cross-form#readme)<br/> Options that not from react-cross-form: <br/> 1- You can add to each field an InitialValue (work only with new document)
+fields|array <br/><small>required<small></small></small>| we use [react-cross-form](https://github.com/doronnahum/react-cross-form#readme)<br/> Options that not from react-cross-form: <br/> 1- You can add to each field an InitialValue (work only with a new document)
 wrapper|element|You can replace the default side modal wrapper , wrapper get this props <br />{<br />isOpen: bollean,<br /> onClose: function,<br />title: string,<br /> children: react children<br />}|
 title|string|title to display
 customTitle|function| function that get {state, props} and return string as title
