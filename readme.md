@@ -1,4 +1,5 @@
 
+
 # react-common-admin
 
 A react page container that works with [react-parse](https://www.npmjs.com/package/react-parse)  to fetch data from server and display as table/gallery ( or customs component) with easy form to edit/create a new documents.
@@ -307,8 +308,8 @@ onPagination|funciton|optional - only if you want to override our function and t
 onQueryChanged|funciton|optional - only if you want to override our function and take the control of this value
 tableProps|object| any props you want to pass to the viewComponent
 ...||Any other parameters you set inside collectionProps will pass to your viewComponent
-viewComponent|element|See collention viewComponent propsviewComponent
-## collention viewComponent
+viewComponent|element|See collection viewComponent propsviewComponent
+## collection viewComponent
 **How to pass your component ?**
 ```jsx
 import MyTablView from './MyDocView'
@@ -393,7 +394,7 @@ import {CommonAdmin, DraggableTable} from  'react-common-admin';
 ...
 ```
 
-## document witout list
+## document without list
 ### Need only a documet ?
 See this example
 ```jsx
@@ -716,23 +717,23 @@ export  const  imgForamtter  =  function (cell, row, field, extraData) {
 }
 ```
 
-> Before you create a formatter, check this list, maybe have something redey for you
+### Before you create a formatter, check Table Fields examples list, maybe there is something ready for you here:
 
 ### Table Fields exmpels
 ```jsx
 import {formatters} from  'react-common-admin'
 ```
 formatter = function(fieldValue, docData, fieldConfig, extraData){ return 'your view'}
-### string
-  ```jsx
+- **string**
+ ```jsx
   {
     key: 'objectId',
     title: 'Object Id',
     search: true
   },
-  ```
+ ```
   
-  ### img
+  - **img**
   ```jsx
   
 {
@@ -742,7 +743,7 @@ formatter = function(fieldValue, docData, fieldConfig, extraData){ return 'your 
 },
   ```
   
-### Pointer with include
+  - **Pointer with include**
   ```jsx
 {
 	key:  'partner',
@@ -758,7 +759,7 @@ formatter = function(fieldValue, docData, fieldConfig, extraData){ return 'your 
 },
   ```
   
-  ### Array
+  - **Array**
   ```jsx
   {
 	key:  'roles',
@@ -767,7 +768,7 @@ formatter = function(fieldValue, docData, fieldConfig, extraData){ return 'your 
 }
   
   ```
-### Array of Pointers
+ - **Array of Pointers**
 When to use?
 when the response from server is like that: ['A12365','Ddck344']
 and you want to display somting like that:  Red,Green
@@ -788,7 +789,7 @@ In this example, our additional data include this:
 	}]
 */
 ```
-### Action Button
+- **Action Button**
 If you want to show in the table action button, at this to collection fields
 ```jsx
 {
@@ -822,7 +823,7 @@ tableProps|object| any props you want to pass to the viewComponent
 }
 ```
 
-### collention - tableProps options
+### collection - tableProps options
 -----
 | key | type | Description|
 |-----|--|--|
